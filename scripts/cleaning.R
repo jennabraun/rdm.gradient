@@ -67,3 +67,15 @@ ggplot(metadata, aes(Microsite, Simpson)) + geom_boxplot() + facet_wrap(~Region)
 ggplot(metadata, aes(Microsite, abun)) + geom_boxplot() + facet_wrap(~Region)
 
 ggplot(metadata, aes(RDM, Species, color = Microsite)) + geom_smooth() + facet_wrap(~Region)
+
+
+ggplot(rdm, aes(RDM)) + geom_density()
+qqnorm(rdm$RDM)
+sq <- rdm$RDM^2
+shapiro.test(sq)
+
+plot(sq)
+
+m1 <- lm(RDM~Microsite + Region, data = rdm)
+shapiro.test(residuals(m1))
+summary(m1)
