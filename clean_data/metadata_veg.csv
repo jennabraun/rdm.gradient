@@ -1,0 +1,21 @@
+Region,"Panoche, Cuyama or Mojave"
+Site,site name within region
+ID,"shrub/open pair ID, matches waypoints on GPS"
+Microsite,shrub or open
+x,"width at widest point of shrub, to nearest 5 cm"
+y,"perpendicular to x, to nearest 5 cm"
+z,"height of shrub, to nearest 5 cm"
+bur.drip,count of burrows underneath shrub
+bur.buf,count of burrows within a 1 foot buffer around dripline
+max.veg.height,max height of vegetation within a 0.5 m by 0.5 m quadrat
+rdm.cov,% rdm within a 0.5 m by 0.5 m quadrat
+green.cov,% green vegetation within a 0.5 m by 0.5 m quadrat
+non.veg.cov,% non-vegetated surface (bare or tiny shrub sticks) within a 0.5 m by 0.5 m quadrat
+largewood.cov,% med-large woody debris (dead branches etc) within a 0.5 m by 0.5 m quadrat
+AT,animal track present within within a 0.5 m by 0.5 m quadrat (Y or N)
+PF,pit falls placed at microsite (Y or N)
+PF.out,date pitfalls were deployed
+PF.in,date pitfalls were picked up
+RDM.date,date RDM was collected
+comments,
+RDM,RDM mass

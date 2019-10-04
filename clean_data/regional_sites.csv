@@ -1,0 +1,13 @@
+region,experiment,site,site.name,site.code,foundation.species,lat,long,elevation,MAT,MAP,aridity.demartonne.annual,aspect,physical.geography,directions
+California,shrub contrast,Panoche,PAN2,1.2,Ephedra californica,36.70654,-120.812,611,14.4,377,2.618055556,South,Aspects,
+California,shrub contrast,Panoche,PAN3,1.3,Ephedra californica,36.70554,-120.81229,596,14.4,377,2.618055556,North,Aspects,
+California,ERG,Panoche,PanocheHills,1,Ephedra californica,36.70000998,-120.801116,656.320862,14.4,381,2.474025974,,"San Joaquin Valley, western hills in an Ephedra dominated strand",
+California,ERG,Mojave,Barstow,4,Ephedra californica,35.094051,-116.8349,496.02,19.7,135,0.652173913,,"Western Mojave desert, typical scrub with Larrea tridentata/Ambrosia dumosa dominating",
+California,ERG,Mojave,HeartofMojave,5,Ephedra californica,34.698199,-115.684169,784.73,19.3,79,0.389162562,,"Central Mojave desert, scrub/wash with Larrea tridentata/Ambrosia dumosa dominating",
+California,ERG,Mojave,SheepholeValley,6,Ephedra californica,34.205676,-115.719676,545.92,20.9,109,0.497716895,,"South-eastern Mojave, near Colorado desert border. Larrea dominated scrub",
+California,micronet,Cuyama,micronet,1,Ephedra californica,34.84872602,-119.483117,848,13.4,533,3.701388889,flat,,
+California,micronet,Cuyama,micronet,2,Ephedra californica,34.85362197,-119.485961,837,13.4,533,3.701388889,flat,,
+California,micronet,Cuyama,micronet,3,Ephedra californica,34.93824399,-119.48084,827,13.4,533,3.701388889,flat,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
