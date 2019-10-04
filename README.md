@@ -8,7 +8,7 @@ Pitfall traps were deployed along an aridity gradient in California to measure a
 
 These instructions describe the contents of this repository and will get you a copy of the project up and running on your local machine. *warning* arthropod identifications subject to change as morphospecies are IDed. 
 
-See <a href = "https://jennabraun.github.io/rdm.gradient> repository webpage </a> for final work up 
+See [https://jennabraun.github.io/rdm.gradient] (repository webpage) for final work up 
 
 ### Data descriptions
 
