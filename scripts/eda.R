@@ -2,24 +2,10 @@ library(tidyverse)
 library(purrr)
 library(ggthemes)
 
-env <- read.csv("cov.csv")
-comm <- read.csv("comm.csv")
-rdm <- read.csv("rdm.csv")
+env <- read.csv("clean_data/cov.csv")
+comm <- read.csv("clean_data/comm.csv")
+rdm <- read.csv("clean_data/veg_covariates.csv")
 
-overdisp_fun <- function(model) {
-  ## number of variance parameters in 
-  ##   an n-by-n variance-covariance matrix
-  vpars <- function(m) {
-    nrow(m)*(nrow(m)+1)/2
-  }
-  model.df <- sum(sapply(VarCorr(model),vpars))+length(fixef(model))
-  rdf <- nrow(model.frame(model))-model.df
-  rp <- residuals(model,type="pearson")
-  Pearson.chisq <- sum(rp^2)
-  prat <- Pearson.chisq/rdf
-  pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
-  c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
-}
 
 
 ggplot(rdm, aes(RDM)) + geom_density() + facet_grid(~site)
@@ -37,6 +23,8 @@ ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~Region)
 ggplot(env, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~Region)
 ggplot(env, aes(Microsite, Even)) + geom_boxplot() + facet_grid(~Region)
 env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region)
+
+
 
 
 m4 <- glm(Species ~ Microsite + Region/site, family = "poisson", data = env)
@@ -182,3 +170,20 @@ r1 <- cca(comm ~ Microsite + site, data = eph)
 summary(r1)
 anova(r1)
 anova.cca(r1, by = "margin")
+
+
+#burrows models
+#do larger epehdra shrubs have more burrows
+b1 <- env %>% filter(., Microsite == "ephedra") %>% glm(bur.drip ~ x + RDM, family = "poisson", data = .)
+summary(b1)
+
+#do larger shrubs with more insects have more burrows?
+b2 <- env %>% filter(., Microsite == "ephedra" & abun < 350) %>% glm(bur.drip ~ x + RDM *abun, family = "poisson", data = .)
+summary(b2)
+#weird
+sjPlot::plot_model(b2, type = "int")
+
+
+
+#prey items only
+ggplot(env, aes(Microsite, prey.abun)) + geom_boxplot()

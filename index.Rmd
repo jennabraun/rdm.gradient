@@ -1,0 +1,118 @@
+---
+title: Arthropod associations with residual dry matter and foundations shrubs in California
+  desert ecosystems
+output:
+    rmdformats::readthedown:
+      collapsed: false
+      highlight: kate
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(purrr)
+library(ggthemes)
+
+env <- read.csv("clean_data/cov.csv")
+comm <- read.csv("clean_data/comm.csv")
+rdm <- read.csv("clean_data/veg_covariates.csv")
+eph <- filter(env, Microsite != "larrea")
+```
+
+***
+
+Pitfall traps were deployed along an aridity gradient in California to measure associations of ground-dwelling arthropods with foundation shrubs, and to assess the ability of residual dry matter (RDM) as an indicator of arthropod community structure.
+
+***
+
+## Differences between sites
+
+
+### Residual dry matter
+```{r}
+ggplot(rdm, aes(RDM)) + geom_density() + facet_grid(~site) + theme_classic()
+ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+
+### Insect morphospecies richness
+```{r}
+ggplot(env, aes(Species, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)+ theme_classic()
+ggplot(env, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+
+
+### Insect abundance
+There is one sample with 1200 insects in it, almost all ants that really throws everything off. 
+```{r}
+env %>% filter(abun < 350) %>% ggplot(aes(abun, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)+ theme_classic()
+
+env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+
+## Influence of shrubs on RDM
+
+### Does shrub size influence RDM?
+```{r}
+ggplot(rdm, aes(x, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Width")+ theme_classic()
+
+ggplot(rdm, aes(z, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Height")+ theme_classic()
+
+```
+
+
+## Influence of RDM on insect communities
+
+### Morphospecies richness
+```{r}
+ggplot(eph, aes(RDM, Species)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
+
+```
+### Arthropod abundance
+```{r}
+ggplot(filter(eph, abun < 350), aes(RDM, abun)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+
+ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+
+ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
+```
+
+
+## Influence of shrubs on arthropod communities
+### Arthropod morphospecies richness
+
+```{r}
+ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~Region) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~site) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+### Arthropod abundance
+```{r}
+ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+
+##RII Influence of shrubs on insect communities
+##RII Influence of shrub on RDM
+##RII insect communities on gradient
+
+
+# Models
+What influences insect abundance, diversity and composition?
+
+What is the strength of plant facilitation?
+Does the strength of facilitation change along the gradient?
+
+#Summary of results
+
+#Prey items only
