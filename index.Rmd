@@ -11,6 +11,8 @@ output:
 library(tidyverse)
 library(purrr)
 library(ggthemes)
+library(glmmTMB)
+library(sjPlot)
 
 env <- read.csv("clean_data/cov.csv")
 comm <- read.csv("clean_data/comm.csv")
@@ -94,25 +96,89 @@ ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~Region) + th
 ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~site) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 ### Arthropod abundance
+
+
 ```{r}
 ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
+## Site level RII 
+### Residual dry matter
 
+```{r}
+rii <- read.csv("clean_data/rii.csv")
+ggplot(rii, aes(arid, average, color = response)) + geom_errorbar(aes(arid, ymin = average - error, ymax = average + error)) + geom_point() + geom_jitter() 
+ggplot(rii, aes(arid, average, color = response)) + geom_smooth(method = lm)
 
-##RII Influence of shrubs on insect communities
-##RII Influence of shrub on RDM
-##RII insect communities on gradient
+```
 
 
 # Models
-What influences insect abundance, diversity and composition?
 
-What is the strength of plant facilitation?
-Does the strength of facilitation change along the gradient?
+### Drivers of insect morphospecies abundance
+
+```{r}
+eph.abun <- filter(eph, abun < 350)
+m1 <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph.abun)
+summary(m1)
+#looks overdispersed
+
+m1.nb <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m1.nb)
+
+m1.nb1 <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
+summary(m1.nb1)
+
+m2 <- glmmTMB(abun ~ Microsite * RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m2)
+
+AIC(m1, m1.nb, m1.nb1)
+
+#nbinom2 without interaction is the best
+summary(m1.nb)
+knitr::kable(car::Anova(m1.nb, type = 2))
+```
+
+### Insect morphospecies richness
+
+```{r}
+m1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
+summary(m1)
+
+#nb models don't coverge -> likely suggests overdispersion not an issue but should add a formal check
+
+m1.nb <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph)
+
+m1.nb1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
+
+
+m2 <- glmmTMB(Species ~ Microsite * RDM + (1|Region/site), family = "poisson", data = eph)
+summary(m2)
+
+AIC(m1, m2)
+
+
+summary(m1)
+knitr::kable(car::Anova(m1, type = 2))
+```
+
+### Residual dry matter
+
+```{r}
+shapiro.test((rdm$RDM)^(1/3))
+#lolz
+
+ggplot(rdm, aes(log(RDM+1))) + geom_density()
+
+m1 <- glmmTMB((rdm$RDM)^(1/3) ~ Microsite + (1|Region/site), family = "gaussian", data = rdm)
+shapiro.test(residuals(m1))
+```
+
 
 #Summary of results
+* Ephedra signficantly influences insect abundance and richness
+* Ephedra supports greater plant biomass
 
 #Prey items only

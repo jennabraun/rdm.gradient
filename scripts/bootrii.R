@@ -47,38 +47,28 @@ boot.rii <- function(x, treatment,variable,iteration){
 
 richness.effect <- eph %>% split(.$site) %>% map(boot.rii, treatment="Microsite", variable="Species", 9999)
 richness.effect <- do.call(rbind, richness.effect)
+richness.effect$site <- row.names(richness.effect)
 
 abun.effect <- eph %>% split(.$site) %>% map(boot.rii, treatment="Microsite", variable="abun", 9999)
 abun.effect <- do.call(rbind, abun.effect)
-
-richness.effect$site <- row.names(richness.effect)
-sites <- read.csv("documents/regional_sites.csv")
-sites$site <- sites$site.name
-richness.effect <- left_join(richness.effect, sites, by = "site")
-richness.effect$arid <- richness.effect$aridity.demartonne.annual
-m1 <- lm(average ~ MAT, data = richness.effect)
-summary(m1)
-
-ggplot(richness.effect, aes(arid, average)) + geom_point()
-
-abun.effect <- do.call(rbind, abun.effect)
 abun.effect$site <- row.names(abun.effect)
-sites <- read.csv("documents/regional_sites.csv")
-sites$site <- sites$site.name
-abun.effect <- left_join(abun.effect, sites, by = "site")
-abun.effect$arid <- abun.effect$aridity.demartonne.annual
-m1 <- lm(average ~ arid, data = abun.effect)
-summary(m1)
-ggplot(abun.effect, aes(arid, average)) + geom_point()
 
 eph.rdm <- filter(rdm, Microsite != "larrea")
 rdm.effect <- eph.rdm %>% split(.$site) %>% map(boot.rii, treatment="Microsite", variable="RDM", 9999)
 rdm.effect <- do.call(rbind, rdm.effect)
-
 rdm.effect$site <- row.names(rdm.effect)
-rdm.effect <- left_join(rdm.effect, sites, by = "site")
-rdm.effect$arid <- rdm.effect$aridity.demartonne.annual
-m1 <- lm(average ~ arid, data = rdm.effect)
-summary(m1)
-ggplot(rdm.effect, aes(arid, average)) + geom_smooth(method
-                                                     = lm)
+
+richness.effect$response <- c("richness")
+abun.effect$response <- c("abun")
+rdm.effect$response <- c("rdm")
+
+
+effect <- rbind(richness.effect, abun.effect, rdm.effect)
+
+
+sites <- read.csv("documents/regional_sites.csv")
+sites$site <- sites$site.name
+effect <- left_join(effect, sites, by = "site")
+effect$arid <- effect$aridity.demartonne.annual
+
+write.csv(effect, "clean_data/rii.csv")
