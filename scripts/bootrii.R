@@ -72,3 +72,31 @@ effect <- left_join(effect, sites, by = "site")
 effect$arid <- effect$aridity.demartonne.annual
 
 write.csv(effect, "clean_data/rii.csv")
+
+#calculate basic rii for rdm, that way have a value for individual shrubs
+#this is just for epehdra
+rdm <- filter(rdm, Microsite != "larrea")
+data <- rdm
+y <- "RDM"
+rii <- function(data, y)
+{
+  # Parse out shrub and open
+  s1 <- subset(data, Microsite == "ephedra", select=RDM)
+  o1 <- subset(data, Microsite == "open", select=RDM)
+  # Rii formula
+  return1 <- (s1 - o1) / (s1+o1)
+}
+
+rdm$uniID <- paste(rdm$site, rdm$ID)
+#first make sure datasets matchup nicely
+s <- filter(rdm, Microsite == "ephedra")
+o <- filter(rdm, Microsite == "open")            
+all.equal(s$uniID, o$uniID)
+#wicked
+
+rii.rdm <- rii(rdm, "RDM")
+rii.rdm <- rename(rii.rdm, rii = RDM)
+x1 <- rdm[seq(1, nrow(rdm), by = 2),]
+rii <- cbind(rii.rdm, x1)
+
+write.csv(rii, "clean_data/rii_individual.csv")
