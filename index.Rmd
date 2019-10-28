@@ -205,4 +205,5 @@ TukeyHSD(a1)
 * Ephedra signficantly influences insect abundance and richness
 * Ephedra supports greater plant biomass
 
-
+# Future analyses?
+* Lavaan structural equation modelling does not support count data

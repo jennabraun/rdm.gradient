@@ -8,64 +8,6 @@ rdm <- read.csv("clean_data/veg_covariates.csv")
 
 
 
-ggplot(rdm, aes(RDM)) + geom_density() + facet_grid(~site)
-ggplot(env, aes(Species, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)
-env %>% filter(abun < 350) %>% ggplot(aes(abun, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)
-ggplot(rdm, aes(x, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Width")
-ggplot(rdm, aes(y, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Height")
-ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~site)
-ggplot(env, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~site)
-ggplot(env, aes(Microsite, Even)) + geom_boxplot() + facet_grid(~site)
-env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site)
-
-
-ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~Region)
-ggplot(env, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~Region)
-ggplot(env, aes(Microsite, Even)) + geom_boxplot() + facet_grid(~Region)
-env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region)
-
-
-
-
-m4 <- glm(Species ~ Microsite + Region/site, family = "poisson", data = env)
-summary(m4)
-library(glmmTMB)
-library(AED)
-m5 <- glmmTMB(abun ~ Microsite + (1|Region/site), family = "poisson", data = env)
-summary(m5)
-
-
-m.abun <- env %>% filter(abun <350) %>% glm(abun ~ Microsite + Region/site, family = "quasipoisson", data = .)
-summary(m.abun)
-
-m.abun <- env %>% filter(abun <350 & Microsite != "larrea") %>% glmmTMB(abun ~ Microsite + (1|Region/site), family = "nbinom2", data = .)
-summary(m.abun)
-
-
-#let's do some ephedra only
-eph <- filter(env, Microsite != "larrea")
-rdm <- filter(rdm, Microsite != "larrea")
-ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~Region) + theme_Publication() + ylab("Morphospecies Richness")
-eph %>% filter(abun <350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region) + theme_Publication() + ylab("Morphospecies Abundance")
-ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~Region) + theme_Publication() + ylab("Residual Dry Matter (g)")
-
-
-m.abun <- eph %>% filter(abun <350) %>% glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = .)
-summary(m.abun)
-
-m2 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
-summary(m2)
-
-shapiro.test(rdm$RDM)
-m3 <- glmmTMB(RDM ~ Microsite + (1|Region/site), family = "gaussian", data = rdm)
-shapiro.test(residuals(m3))
-summary(m3)
-
-ggplot(rdm, aes(Microsite, bur.drip)) + geom_boxplot() + facet_grid(~Region) + theme_Publication() + ylab("Number of burrows")
-
-s1 <- glmmTMB(bur.drip ~  RDM + (1|Region/site), family = "poisson", data = eph)
-summary(s1)
-
 #interesting stuff is happening, let's check out some ordinations
 row.names(comm) <- comm$X
 comm <- comm[-1]
