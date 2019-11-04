@@ -161,17 +161,46 @@ summary(m1)
 
 m1.nb <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph)
 
+m1.p <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
+
+
+anova(m1.nb, m1.p)
+
+
 m1.nb1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
 
+summary(aov(m1.nb, m1.nb1))
 
 m2 <- glmmTMB(Species ~ Microsite * RDM + (1|Region/site), family = "poisson", data = eph)
 summary(m2)
+
+
+plot(fitted(m2), resid(m2))
 
 AIC(m1, m2)
 
 
 summary(m1)
 knitr::kable(car::Anova(m1, type = 2))
+```
+
+```{r, gam}
+#trying a GAM
+library(mgcv)
+g1 <- gam(Species ~ Microsite * RDM, family = "poisson", data = eph)
+summary(g1)
+g2 <- gam(Species ~ Microsite + RDM, family = "poisson", data = eph)
+summary(g2)
+
+
+g1.q <- gam(Species ~ Microsite * RDM, family = "quasipoisson", data = eph)
+summary(g1.q)
+g1.q <- gam(Species ~ Microsite + RDM, family = "quasipoisson", data = eph)
+summary(g1.q)
+
+
+
+
 ```
 
 ### H
@@ -188,6 +217,9 @@ shapiro.test(rdm$RDM)
 m1 <- filter(rdm, RDM >0 ) %>% glmmTMB(RDM ~ Microsite + (1|Region/site), family = Gamma, data = .)
 summary(m1)
 
+
+
+
 car::Anova(m1, type = 2)
 ```
 ### RII differences between sites
@@ -199,6 +231,23 @@ TukeyHSD(a1)
 
 ```
 
+
+```{r}
+
+#want to make a plot of site level rii vs average rii
+av <- indrii %>% group_by(site) %>% summarise(mean.rdm = mean(rii))
+mets <- filter(rii, response != 'rdm')
+av <- right_join(av, mets, by = "site") 
+
+rdm.av <- rdm %>% filter(Microsite == "ephedra") %>% group_by(site) %>% summarise(mean.rdm = mean(RDM))
+
+av <- right_join(av, rdm.av, by = "site")
+ggplot(av, aes(mean.rdm.y, average, color = response)) + geom_smooth(method = lm) + geom_point() + xlab("Mean Shrub RII") + ylab("RII")
+
+eph.rdm <- filter(rdm, Microsite != "larrea")
+ggplot(eph.rdm, aes(RDM, fill = Microsite)) + geom_density(alpha = 0.7) + theme_classic() + xlab("RDM (g)")
+
+```
 
 # Summary of results
 
