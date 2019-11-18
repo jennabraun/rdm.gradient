@@ -67,27 +67,18 @@ count(test, PF.x == "N")
 write.csv(metadata, "clean_data/cov.csv")
 write.csv(wide, "clean_data/comm.csv")
 
-#potential prey items only
-codes <- read.csv("clean_data/morphospecies_descriptions.csv")
-codes$morpho <- paste(codes$highest.rtu, codes$Morphotype)
-codes$morpho <- gsub(" ", "", codes$morpho)
-wide$uniID <- row.names(wide)
-prey <- gather(wide, morpho, count, 1:207)
-prey <- right_join(prey, codes, by = "morpho")
-prey <- filter(prey, BNLL.prey.item. == "Y")
-prey <- select(prey, 1:3)
-prey <- spread(prey, morpho, count)
-prey <- filter(prey, uniID != "NA")
-row.names(prey) <- prey$uniID
-prey <- select(prey, -uniID)
-all.equal(row.names(prey), row.names(metadata))
-str(prey)
+#make a data frame of the regions each morphospecies is found
+arth$pres <- "Y"
+arth <- select(arth, morph, Region, pres)
+arth <- distinct(arth)
+regions <- arth %>% pivot_wider(., morph, names_from = Region, values_from = pres)
+write.csv(regions, "clean_data/regions.csv")
+morphs <- read.csv("clean_data/morphospecies_descriptions.csv")
 
-#get rid of columns containing NAs becasue they are unassigned morphospecies
-prey <- prey %>% select_if(~ !any(is.na(.)))
 
-metadata$prey.abun <- apply(prey, 1, sum)
-metadata$prey.Species <- specnumber(wide)
-
-write.csv(prey, "clean_data/bnll_prey.csv")
-write.csv(metadata, "clean_data/cov.csv")
+morphs$morph <- paste(morphs$highest.taxanomic.resolution, morphs$Morphotype)
+morphs$morph <- gsub(" ", "", morphs$morph)
+regions$morph <- gsub(" ", "", regions$morph)
+morphs <- left_join(morphs, regions, by = "morph")
+a <- filter(morphs, is.na(Cuyama) == TRUE & is.na(Mojave) == TRUE & is.na(Panoche == "TRUE"))
+write.csv(morphs, "clean_data/morphospecies_descriptions.csv")

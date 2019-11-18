@@ -129,3 +129,9 @@ sjPlot::plot_model(b2, type = "int")
 
 #prey items only
 ggplot(env, aes(Microsite, prey.abun)) + geom_boxplot()
+
+library(dplyr)
+
+f <- arth %>% filter(., Order != "Microcoryphia" & Family != "Formicidae" & highest.rtu != "ignore" & highest.rtu != "damaged")
+
+c <- arth %>% filter(., highest.rtu != "damaged" & highest.rtu != "ignore") %>% count(.,Order)

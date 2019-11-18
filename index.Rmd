@@ -67,6 +67,11 @@ ggplot(rdm, aes(z, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Heigh
 
 ```
 
+### Is RDM cover greater undershrubs?
+```{r}
+ggplot(rdm, aes(Microsite, rdm.cov)) + geom_boxplot() + facet_grid(~Region)
+```
+
 
 ## Influence of RDM on insect communities
 
@@ -141,6 +146,9 @@ summary(m1.nb)
 m1.nb1 <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
 summary(m1.nb1)
 
+m1.nb.rdm <- glmmTMB(abun ~ RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m1.nb.rdm)
+
 m2 <- glmmTMB(abun ~ Microsite * RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
 summary(m2)
 
@@ -149,6 +157,13 @@ AIC(m1, m1.nb, m1.nb1)
 #nbinom2 without interaction is the best
 summary(m1.nb)
 knitr::kable(car::Anova(m1.nb, type = 2))
+
+
+m3 <- glmmTMB(abun ~ Microsite + rdm.cov + (1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m3)
+
+
+AIC(m1.nb, m3)
 ```
 
 ### Insect morphospecies richness
@@ -179,28 +194,11 @@ plot(fitted(m2), resid(m2))
 
 AIC(m1, m2)
 
+m3.cov <- glmmTMB(Species ~ Microsite + rdm.cov + (1|Region/site), family = "poisson", data = eph)
+summary(m3.cov)
 
 summary(m1)
 knitr::kable(car::Anova(m1, type = 2))
-```
-
-```{r, gam}
-#trying a GAM
-library(mgcv)
-g1 <- gam(Species ~ Microsite * RDM, family = "poisson", data = eph)
-summary(g1)
-g2 <- gam(Species ~ Microsite + RDM, family = "poisson", data = eph)
-summary(g2)
-
-
-g1.q <- gam(Species ~ Microsite * RDM, family = "quasipoisson", data = eph)
-summary(g1.q)
-g1.q <- gam(Species ~ Microsite + RDM, family = "quasipoisson", data = eph)
-summary(g1.q)
-
-
-
-
 ```
 
 ### H
@@ -248,6 +246,16 @@ eph.rdm <- filter(rdm, Microsite != "larrea")
 ggplot(eph.rdm, aes(RDM, fill = Microsite)) + geom_density(alpha = 0.7) + theme_classic() + xlab("RDM (g)")
 
 ```
+
+## Correlations
+```{r}
+
+av %>% filter(response == "richness") %>% cor.test(~mean.rdm.x + average, data =.)
+av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + average, data =.)
+
+
+```
+
 
 # Summary of results
 
