@@ -55,10 +55,21 @@ env %>% filter(abun < 350) %>% ggplot(aes(abun, fill = Microsite)) + geom_densit
 env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
+### Simple counts
+```{r}
+arth.lg <- read.csv("clean_data/arth_long.csv")
+arth.lg <- filter(arth.lg, highest.rtu != "damaged" & highest.rtu != "ignore" & highest.rtu != "alate")
+str(arth.lg)
+
+sum(arth.lg$Quantity)
+ants <- filter(arth.lg, Family == "Formicidae") 
+sum(ants$Quantity)
+ants %>% count(highest.rtu)
+ants %>% count(morph)
+```
 
 
 ## Influence of shrubs on RDM
-
 ### Does shrub size influence RDM?
 ```{r}
 ggplot(rdm, aes(x, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Width")+ theme_classic()

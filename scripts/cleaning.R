@@ -17,7 +17,7 @@ arth$Microsite <- gsub("shrub", "ephedra", arth$Microsite)
 arth$uniID <- paste(arth$Site, arth$Microsite, arth$Rep)
 arth$morph <- paste(arth$highest.rtu, arth$Morpho_code)
 
-
+write.csv(arth, "clean_data/arth_long.csv")
 #aggregrate observations
 arth.ag <- dplyr::select(arth, uniID, morph, Quantity)
 arth.ag <- arth.ag %>% group_by(uniID, morph) %>% summarise(Quantity = sum(Quantity)) 
@@ -28,6 +28,8 @@ arth.ag$morph <- gsub(" ","", arth.ag$morph)
 wide <- arth.ag %>% spread(morph, Quantity)
 wide <- select(wide, -"ignoreNA", -"damagedNA")
 wide[is.na(wide)] <- 0
+
+
 
 ##make metadata dataframe
 metadata <- rdm
