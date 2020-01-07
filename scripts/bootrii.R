@@ -100,3 +100,27 @@ x1 <- rdm[seq(1, nrow(rdm), by = 2),]
 rii <- cbind(rii.rdm, x1)
 
 write.csv(rii, "clean_data/rii_individual.csv")
+
+z <- "rdm.cov"
+rii.cov <- function(data, z)
+{
+  # Parse out shrub and open
+  s1 <- subset(data, Microsite == "ephedra", select="rdm.cov")
+  o1 <- subset(data, Microsite == "open", select="rdm.cov")
+  # Rii formula
+  return1 <- (s1 - o1) / (s1+o1)
+}
+
+
+#one of the covers is NA
+
+
+rdm <- dplyr::filter(rdm, X != 359 & X!=360)
+mean(rdm$rdm.cov)
+
+rii.rdm.cov <- rii.cov(rdm, "rdm.cov")
+rii.rdm.cov <- rename(rii.rdm.cov, rii = rdm.cov)
+x1 <- rdm[seq(1, nrow(rdm), by = 2),]
+rii <- cbind(rii.rdm.cov, x1)
+
+write.csv(rii, "clean_data/rii_individual_rdmcover.csv")

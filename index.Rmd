@@ -13,11 +13,16 @@ library(purrr)
 library(ggthemes)
 library(glmmTMB)
 library(sjPlot)
+library(performance)
+```
 
+```{r}
 env <- read.csv("clean_data/cov.csv")
 comm <- read.csv("clean_data/comm.csv")
 rdm <- read.csv("clean_data/veg_covariates.csv")
 eph <- filter(env, Microsite != "larrea")
+eph$Microsite <- relevel(eph$Microsite, ref = "open")
+rdm$Microsite <- relevel(rdm$Microsite, ref = "open")
 ```
 
 ***
@@ -172,9 +177,15 @@ knitr::kable(car::Anova(m1.nb, type = 2))
 
 m3 <- glmmTMB(abun ~ Microsite + rdm.cov + (1|Region/site), family = "nbinom2", data = eph.abun)
 summary(m3)
-
-
 AIC(m1.nb, m3)
+
+
+
+m4 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m4)
+knitr::kable(car::Anova(m4, type = 2))
+
+check_collinearity(m4)
 ```
 
 ### Insect morphospecies richness
@@ -208,36 +219,43 @@ AIC(m1, m2)
 m3.cov <- glmmTMB(Species ~ Microsite + rdm.cov + (1|Region/site), family = "poisson", data = eph)
 summary(m3.cov)
 
-summary(m1)
-knitr::kable(car::Anova(m1, type = 2))
-```
+m4 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|Region/site), family = "poisson", data = eph)
 
-### H
+summary(m4)
+knitr::kable(car::Anova(m4, type = 2))
+check_collinearity(m4)
+m5 <- glmmTMB(Species ~ Microsite * RDM * rdm.cov + (1|Region/site), family = "poisson", data = eph)
+
+
+```
 
 
 ### Residual dry matter
 
-```{r}
 
-rdm <- filter(rdm, Microsite != "larrea")
-shapiro.test(rdm$RDM)
-#data are right-skewed. There are only a couple of zeroes so dropping them and using Gamma for now.
-
-m1 <- filter(rdm, RDM >0 ) %>% glmmTMB(RDM ~ Microsite + (1|Region/site), family = Gamma, data = .)
-summary(m1)
-
-
-
-
-car::Anova(m1, type = 2)
-```
 ### RII differences between sites
 ```{r}
 shapiro.test(indrii$rii)
 t.test(indrii$rii)
-a1 <- aov(rii ~ Region, data = indrii)
-TukeyHSD(a1)
+#not normal though
 
+library(boot)
+bootmean <- function(d, i) mean(d[i])
+RDM.rii <- boot(indrii$rii, bootmean, R=10000, stype ="i")
+ci.RDM.rii <- boot.ci(RDM.rii)
+bca.RDM <- ci.RDM.rii$bca
+
+
+
+rii.cover <- read.csv("clean_data/rii_individual_rdmcover.csv")
+str(rii.cover)
+mean(rii.cover$rii)
+
+
+cover.rii <- boot(rii.cover$rii, bootmean, R=1000, stype ="i")
+ci.cover.rii <- boot.ci(cover.rii)
+bca.cover <- ci.cover.rii$bca
+t.test(rii.cover$rii)
 ```
 
 
