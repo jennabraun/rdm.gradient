@@ -23,6 +23,8 @@ rdm <- read.csv("clean_data/veg_covariates.csv")
 eph <- filter(env, Microsite != "larrea")
 eph$Microsite <- relevel(eph$Microsite, ref = "open")
 rdm$Microsite <- relevel(rdm$Microsite, ref = "open")
+
+se <- function(x) sd(x)/sqrt(length(x)) ## SE
 ```
 
 ***
@@ -58,6 +60,10 @@ There is one sample with 1200 insects in it, almost all ants that really throws 
 env %>% filter(abun < 350) %>% ggplot(aes(abun, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)+ theme_classic()
 
 env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+sum(env$abun)
+sum(eph$abun)
 ```
 
 ### Simple counts
@@ -66,7 +72,9 @@ arth.lg <- read.csv("clean_data/arth_long.csv")
 arth.lg <- filter(arth.lg, highest.rtu != "damaged" & highest.rtu != "ignore" & highest.rtu != "alate")
 str(arth.lg)
 
+#this is with larrea
 sum(arth.lg$Quantity)
+
 ants <- filter(arth.lg, Family == "Formicidae") 
 sum(ants$Quantity)
 ants %>% count(highest.rtu)
@@ -269,7 +277,7 @@ av <- right_join(av, mets, by = "site")
 rdm.av <- rdm %>% filter(Microsite == "ephedra") %>% group_by(site) %>% summarise(mean.rdm = mean(RDM))
 
 av <- right_join(av, rdm.av, by = "site")
-ggplot(av, aes(mean.rdm.y, average, color = response)) + geom_smooth(method = lm) + geom_point() + xlab("Mean Shrub RII") + ylab("RII")
+ggplot(av, aes(mean.rdm.y, average, color = response)) + geom_smooth(method = lm) + geom_point() + xlab("Mean RDM under shrub (g)") + ylab("RII")
 
 eph.rdm <- filter(rdm, Microsite != "larrea")
 ggplot(eph.rdm, aes(RDM, fill = Microsite)) + geom_density(alpha = 0.7) + theme_classic() + xlab("RDM (g)")
@@ -282,10 +290,44 @@ ggplot(eph.rdm, aes(RDM, fill = Microsite)) + geom_density(alpha = 0.7) + theme_
 av %>% filter(response == "richness") %>% cor.test(~mean.rdm.x + average, data =.)
 av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + average, data =.)
 
+av %>% filter(response == "richness") %>% cor.test(~mean.rdm.y + average, data =.)
+av %>% filter(response == "abun") %>% cor.test(~mean.rdm.y + average, data =.)
 
 ```
 
+## Ephedra summary stats 
+```{r}
+arth.eph <- filter(arth.lg, Microsite != "larrea")
 
+sum(arth.eph$Quantity)
+
+ants <- filter(arth.eph, Family == "Formicidae") 
+sum(ants$Quantity)
+ants %>% count(highest.rtu)
+ants %>% count(morph)
+
+
+mean(eph.abun$abun)
+sd(eph.abun$abun)
+
+
+
+#let's make a few summary figures
+
+#by region
+region.mean <- data.frame()
+region.mean<- eph.abun %>% group_by(Region, Microsite) %>% summarise(mean.RDM = mean(RDM),  mean.cover = mean(rdm.cov), mean.abun = mean(abun),  mean.rich = mean(Species))  %>% gather(var, mean, 3:6)
+
+region.se <- eph.abun %>% group_by(Region, Microsite) %>% summarise(se.RDM = se(RDM), se.cover = se(rdm.cov), se.abun = se(abun), se.rich = se(Species)) %>% gather(var, se, 3:6)
+
+region.summ <-data.frame()
+region.summ <- cbind(region.mean, region.se)
+region.summ <- region.summ[, -c(5:7)]
+
+
+ggplot(region.summ, aes(Region, mean, fill = Microsite)) + geom_bar(stat = "identity", position = "dodge") + geom_errorbar(aes(Region,  ymax = mean + se, ymin = mean - se), position = "dodge") + facet_wrap(~var, scales = "free")
+
+```
 # Summary of results
 
 * Ephedra signficantly influences insect abundance and richness

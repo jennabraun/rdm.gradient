@@ -17,6 +17,12 @@ arth$Microsite <- gsub("shrub", "ephedra", arth$Microsite)
 arth$uniID <- paste(arth$Site, arth$Microsite, arth$Rep)
 arth$morph <- paste(arth$highest.rtu, arth$Morpho_code)
 
+
+#filter out ignores
+arth <- filter(arth, highest.rtu != "alate" & highest.rtu != "ignore" & highest.rtu != "damaged")
+
+sum(arth$Quantity)
+
 write.csv(arth, "clean_data/arth_long.csv")
 #aggregrate observations
 arth.ag <- dplyr::select(arth, uniID, morph, Quantity)
@@ -26,10 +32,7 @@ sum(arth.ag$Quantity)
 arth.ag$morph <- gsub(" ","", arth.ag$morph)
 
 wide <- arth.ag %>% spread(morph, Quantity)
-wide <- select(wide, -"ignoreNA", -"damagedNA")
 wide[is.na(wide)] <- 0
-
-
 
 ##make metadata dataframe
 metadata <- rdm
@@ -68,6 +71,41 @@ count(test, PF.x == "N")
 
 write.csv(metadata, "clean_data/cov.csv")
 write.csv(wide, "clean_data/comm.csv")
+
+
+#I want the same community and env without ephedra
+arth.ag <- dplyr::select(arth, uniID, morph, Microsite, Quantity)
+arth.ag <- filter(arth.ag, Microsite != "larrea")
+#arth.ag <- filter(arth.ag, uniID != "PAN2 open 11")
+arth.ag <- arth.ag %>% group_by(uniID, morph) %>% summarise(Quantity = sum(Quantity)) 
+sum(arth.ag$Quantity)
+
+arth.ag$morph <- gsub(" ","", arth.ag$morph)
+wide.eph <- arth.ag %>% spread(morph, Quantity)
+wide.eph[is.na(wide.eph)] <- 0
+
+row.names(wide.eph) <- wide.eph$uniID
+metadata <- metadata[match(wide.eph$uniID, metadata$uniID),]
+missing <- anti_join(wide.eph, metadata, by = "uniID")
+wide.eph <- wide.eph %>% ungroup(uniID) %>% select(-uniID)
+
+all.equal(rownames(wide.eph), rownames(metadata))
+metadata$abun <- apply(wide.eph, 1, sum)
+#check for total
+sum(metadata$abun)
+H <- diversity(wide.eph)
+simp <- diversity(wide.eph, "simpson")
+S <- specnumber(wide.eph)
+J <- H/log(S)
+metadata$H <- H
+metadata$Simpson <- simp
+metadata$Species <- S
+metadata$Even <- J
+
+
+
+write.csv(metadata, "clean_data/cov_eph.csv")
+write.csv(wide.eph, "clean_data/comm_eph.csv")
 
 #make a data frame of the regions each morphospecies is found
 arth$pres <- "Y"
