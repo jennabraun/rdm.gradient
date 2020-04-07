@@ -2,7 +2,9 @@
 
 library(vegan)
 library(ggfortify)
+library(tidyverse)
 library(ggvegan)
+
 comm <- read.csv("clean_data/comm_eph.csv")
 row.names(comm) <- comm$X
 comm <- comm[,-1]
@@ -31,7 +33,7 @@ a1
 
 #comm <- decostand(comm, method = "hellinger")
 #not transforming for CCA
-r1 <- cca(comm ~ Microsite + rdm.cov + RDM + site, data = env)
+r1 <- cca(comm ~ Microsite  + rdm.cov + site, data = env)
 summary(r1)
 r1
 goodness(r1)
@@ -40,4 +42,47 @@ anova(r1, by = "axis")
 a1
 
 
-autoplot(r1)
+test <- autoplot(r1, layers = "sites", data = env) + theme_bw()
+
+test + aes(r1, colour = "Microsite")
+
+pca_fort <- fortify(r1, display = "sites") %>%
+  bind_cols(env)
+
+pca_fort
+
+ggplot(pca_fort, aes(x = CCA1, y = CCA2, colour = Microsite, shape = Region, size = Region)) + geom_point() +
+  scale_color_viridis_d() +
+  scale_size(range = 2) +
+  coord_equal() + theme_bw() + scale_size_manual(values = c(1, 2, 3)) + xlab("CCA1 (23%)") + ylab("CC2 (17%)")
+
+
+
+
+#test for dissimilarity
+a1 <- anosim(comm, env$Microsite, permutations = 999, distance = "bray")
+summary(a1)
+a2 <- anosim(comm, env$Region, permutations = 999, distance = "bray")
+summary(a2)
+
+ggbiplot(r1)
+
+#calculating species overlap and comparing distances
+
+open <- filter(eph, Microsite == "open")
+shrub <- filter(eph, Microsite == "ephedra")
+comm.open <- comm[match(open$uniID, rownames(comm)),]
+comm.shrub <- comm[match(shrub$uniID, rownames(comm)),]
+all.equal(rownames(comm.open), as.character(open$uniID))
+all.equal(rownames(comm.shrub), as.character(shrub$uniID))
+
+open.dist <- vegdist(comm.open, method = "bray")
+shrub.dist <- vegdist(comm.shrub, method = "bray")
+open.dist <- as.matrix(open.dist)
+
+#indicator species analysis
+factor(eph$Microsite, levels = c("ephedra", "open"))
+eph$group <- paste(eph$Region, eph$Microsite)
+library(indicspecies)
+indval <- multipatt(comm, eph$group, control = how(nperm=999))
+summary(indval)
