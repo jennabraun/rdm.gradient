@@ -21,6 +21,9 @@ env <- read.csv("clean_data/cov.csv")
 comm <- read.csv("clean_data/comm.csv")
 rdm <- read.csv("clean_data/veg_covariates.csv")
 eph <- filter(env, Microsite != "larrea")
+str(eph)
+eph$Microsite <- as.factor(eph$Microsite)
+rdm$Microsite <- as.factor(rdm$Microsite)
 eph$Microsite <- relevel(eph$Microsite, ref = "open")
 rdm$Microsite <- relevel(rdm$Microsite, ref = "open")
 
@@ -156,7 +159,7 @@ ggplot(indrii, aes(x, rii)) + geom_point() + geom_smooth(method = lm) + xlab("Sh
 
 # Models
 
-### Drivers of insect morphospecies abundance
+## Drivers of arthropod abundance
 
 ```{r}
 eph.abun <- filter(eph, abun < 350)
@@ -189,14 +192,14 @@ AIC(m1.nb, m3)
 
 
 
-m4 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
+m4 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM +  (1|Region/site), family = "nbinom2", data = eph.abun)
 summary(m4)
 knitr::kable(car::Anova(m4, type = 2))
 
 check_collinearity(m4)
 ```
 
-### Insect morphospecies richness
+## Insect morphospecies richness
 
 ```{r}
 m1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
@@ -235,12 +238,25 @@ m4 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|Region/site), family = "p
 summary(m4)
 knitr::kable(car::Anova(m4, type = 2))
 check_collinearity(m4)
-m5 <- glmmTMB(Species ~ Microsite * RDM * rdm.cov + (1|Region/site), family = "poisson", data = eph)
+m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + green.cov + non.veg.cov + (1|Region/site), family = "poisson", data = eph)
 
+summary(m5)
+```
+## Influence of shrub size
+```{r, shrub size}
+
+#redo models
+#shrub microsite only
+shr <- filter(eph, Microsite == "ephedra")
+
+m1.shr <- glmmTMB(Species ~ x + (1|Region/site), family = "poisson", data = shr)
+summary(m1.shr)
+
+shr.abun <- filter(eph, abun < 350)
+m2.shr <- glmmTMB(abun ~ x + z + (1|Region/site), family = "nbinom2", data = shr.abun)
+summary(m2.shr)
 
 ```
-
-
 ### Residual dry matter
 
 
@@ -347,9 +363,28 @@ labels <- c(mean.RDM = "RDM biomass (g)", mean.cover = "RDM cover", mean.abun = 
 
 ggplot(region.summ, aes(Region, mean, colour = Microsite)) + geom_point(position=position_dodge(width=0.9), aes(y=mean, colour=Microsite)) + geom_errorbar(aes(Region,  ymax = mean + se, ymin = mean - se), position = "dodge") + facet_wrap(.~var, scales = "free", labeller = labeller(var = labels)) + theme_bw(base_size = 16) + scale_colour_manual(values = c("black", "red")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + ylab("Mean")
 
+```
+
+
+```{r}
+ggplot(eph, aes(RDM, Species)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
+
+```
+### Arthropod abundance
+```{r}
+ggplot(filter(eph, abun < 350), aes(RDM, abun)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+
+ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+
+ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
 
 
 ```
+
+
+
 # Summary of results
 
 * Ephedra signficantly influences insect abundance and richness

@@ -42,7 +42,7 @@ anova(r1, by = "axis")
 a1
 
 
-test <- autoplot(r1, layers = "sites", data = env) + theme_bw()
+test <- autoplot(r1, layers = "species", data = env) + theme_bw()
 
 test + aes(r1, colour = "Microsite")
 
