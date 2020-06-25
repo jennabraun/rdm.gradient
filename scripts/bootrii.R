@@ -17,7 +17,9 @@
 # treatment.var = treatment specified in quotations
 # control.var = control specified in quotations
 # variable = response variable of interest
-# number of times to commit bootstrapping. 
+# number of times to commit bootstrapping.
+library(dplyr)
+library(purrr)
 se <- function(x) sd(x)/sqrt(length(x)) ## SE
 
 boot.rii <- function(x, treatment,variable,iteration){
@@ -66,7 +68,7 @@ rdm.effect$response <- c("rdm")
 effect <- rbind(richness.effect, abun.effect, rdm.effect)
 
 
-sites <- read.csv("documents/regional_sites.csv")
+sites <- read.csv("clean_data/regional_sites.csv")
 sites$site <- sites$site.name
 effect <- left_join(effect, sites, by = "site")
 effect$arid <- effect$aridity.demartonne.annual

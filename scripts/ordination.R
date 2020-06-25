@@ -11,6 +11,8 @@ comm <- comm[,-1]
 env <- read.csv("clean_data/cov_eph.csv")
 
 
+env <- left_join(env, effect, by = "site")
+env <- distinct(env)
 #bray-curtis
 
 comm.bc.dist <- vegdist(comm, method = "bray")
@@ -33,7 +35,7 @@ a1
 
 #comm <- decostand(comm, method = "hellinger")
 #not transforming for CCA
-r1 <- cca(comm ~ Microsite  + rdm.cov + site, data = env)
+r1 <- cca(comm ~ Microsite  + rdm.cov + arid + ESI + Region, data = env)
 summary(r1)
 r1
 goodness(r1)
@@ -62,7 +64,7 @@ ggplot(pca_fort, aes(x = CCA1, y = CCA2, colour = Microsite, shape = Region, siz
 #test for dissimilarity
 a1 <- anosim(comm, env$Microsite, permutations = 999, distance = "bray")
 summary(a1)
-a2 <- anosim(comm, env$Region, permutations = 999, distance = "bray")
+a2 <- anosim(comm, env$site, permutations = 999, distance = "bray")
 summary(a2)
 
 ggbiplot(r1)

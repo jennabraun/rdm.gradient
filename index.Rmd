@@ -162,7 +162,11 @@ ggplot(indrii, aes(x, rii)) + geom_point() + geom_smooth(method = lm) + xlab("Sh
 ## Drivers of arthropod abundance
 
 ```{r}
+
+effect <- select(rii, site, ESI, arid)
+eph <- left_join(eph, effect, by = "site")
 eph.abun <- filter(eph, abun < 350)
+eph.abun <- distinct(eph.abun)
 m1 <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph.abun)
 summary(m1)
 #looks overdispersed
@@ -186,14 +190,44 @@ summary(m1.nb)
 knitr::kable(car::Anova(m1.nb, type = 2))
 
 
+m1.arid <- glmmTMB(abun ~ Microsite + RDM + arid +(1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m1.arid)
+
+m2.arid <- glmmTMB(abun ~ Microsite + RDM + arid +(1|Region), family = "nbinom2", data = eph.abun)
+summary(m2.arid)
+
+m3.arid <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
+summary(m3.arid)
+
+m4.arid <- glmmTMB(abun ~ Microsite + RDM + arid, family = "nbinom2", data = eph.abun)
+summary(m4.arid)
+
+m5.arid <- glmmTMB(abun ~ Microsite + RDM + arid + Region, family = "nbinom2", data = eph.abun)
+summary(m5.arid)
+
+m6.arid <- glmmTMB(abun ~ Microsite + RDM + arid + (1|site), family = "nbinom2", data = eph.abun)
+summary(m6.arid)
+
+m7.arid <- glmmTMB(abun ~ Microsite + RDM + (1|site), family = "nbinom2", data = eph.abun)
+
+
+summary(m7.arid)
+AIC(m1.arid, m2.arid, m3.arid, m4.arid, m5.arid, m6.arid, m7.arid)
+
+
+
 m3 <- glmmTMB(abun ~ Microsite + rdm.cov + (1|Region/site), family = "nbinom2", data = eph.abun)
 summary(m3)
 AIC(m1.nb, m3)
 
+m3 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM + rdm.cov + (1|site), family = "nbinom2", data = eph.abun)
 
-
-m4 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM +  (1|Region/site), family = "nbinom2", data = eph.abun)
+m4 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM + rdm.cov + (1|Region/site), family = "nbinom2", data = eph.abun)
 summary(m4)
+
+AIC(m3,m4)
+
+
 knitr::kable(car::Anova(m4, type = 2))
 
 check_collinearity(m4)
@@ -202,6 +236,7 @@ check_collinearity(m4)
 ## Insect morphospecies richness
 
 ```{r}
+eph <- distinct(eph)
 m1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
 summary(m1)
 
@@ -210,10 +245,7 @@ summary(m1)
 m1.nb <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph)
 
 m1.p <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
-
-
 anova(m1.nb, m1.p)
-
 
 m1.nb1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
 
@@ -235,9 +267,29 @@ summary(m3.cov.in)
 
 m4 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|Region/site), family = "poisson", data = eph)
 
+
+m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|site), family = "poisson", data = eph)
+summary(m5)
+
+AIC(m4,m5)
 summary(m4)
 knitr::kable(car::Anova(m4, type = 2))
 check_collinearity(m4)
+
+
+m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|site), family = "poisson", data = eph)
+summary(m5)
+
+m6 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + ESI + arid +(1|site), family = "poisson", data = eph)
+summary(m6)
+
+m7 <- glmmTMB(Species ~ Microsite + RDM*ESI + rdm.cov, family = "poisson", data = eph)
+summary(m7)
+
+AIC(m5, m6, m7)
+
+cor.test(eph$ESI, eph$arid)
+
 m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + green.cov + non.veg.cov + (1|Region/site), family = "poisson", data = eph)
 
 summary(m5)
@@ -293,7 +345,8 @@ av <- indrii %>% group_by(site) %>% summarise(mean.rdm = mean(rii))
 mets <- filter(rii, response != 'rdm')
 av <- right_join(av, mets, by = "site") 
 
-rdm.av <- rdm %>% filter(Microsite == "ephedra") %>% group_by(site) %>% summarise(mean.rdm = mean(RDM))
+#need to fix this
+rdm.av <- rdm %>%  group_by(site) %>% summarise(mean.rdm = mean(RDM))
 
 av <- right_join(av, rdm.av, by = "site")
 ggplot(av, aes(mean.rdm.y, average, color = response)) + geom_smooth(method = lm) + geom_point() + xlab("Mean RDM under shrub (g)") + ylab("RII")
@@ -311,6 +364,33 @@ av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + average, data =.)
 
 av %>% filter(response == "richness") %>% cor.test(~mean.rdm.y + average, data =.)
 av %>% filter(response == "abun") %>% cor.test(~mean.rdm.y + average, data =.)
+
+av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + arid, data =.)
+av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + ESI, data =.)
+
+
+
+rd <- select(av, site, mean.rdm.y)
+rii <- left_join(rii, rd, by = "site")
+rii <- distinct(rii)
+
+rii %>% filter(response == "richness") %>% cor.test(~arid+ average, data =.)
+rii %>% filter(response == "abun") %>% cor.test(~arid+ average, data =.)
+
+
+
+rii %>% filter(response == "rdm") %>% cor.test(~ESI+ average, data =.)
+rii %>% filter(response == "rdm") %>% cor.test(~arid+ average, data =.)
+
+library(ggplot2)
+
+ggplot(filter(rii,response == "abun"), aes(reorder(site, arid), arid)) + geom_bar(stat="identity")
+       
+m1 <- lm(response ~ arid, data = filter(rii, response == "rdm"))
+
+
+abun.rii <- filter(rii,response == "abun")
+kruskal.test(abun.rii$region, abun.rii$average)
 
 ```
 
