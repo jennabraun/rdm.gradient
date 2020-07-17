@@ -60,18 +60,27 @@ rdm.effect <- eph.rdm %>% split(.$site) %>% map(boot.rii, treatment="Microsite",
 rdm.effect <- do.call(rbind, rdm.effect)
 rdm.effect$site <- row.names(rdm.effect)
 
+cov.effect <- eph.rdm %>% split(.$site) %>% map(boot.rii, treatment="Microsite", variable="rdm.cov", 9999)
+cov.effect <- do.call(rbind, cov.effect)
+cov.effect$site <- row.names(cov.effect)
+
 richness.effect$response <- c("richness")
 abun.effect$response <- c("abun")
 rdm.effect$response <- c("rdm")
+cov.effect$response <- c("cov")
 
-
-effect <- rbind(richness.effect, abun.effect, rdm.effect)
+effect <- rbind(richness.effect, abun.effect, rdm.effect, cov.effect)
 
 
 sites <- read.csv("clean_data/regional_sites.csv")
 sites$site <- sites$site.name
 effect <- left_join(effect, sites, by = "site")
-effect$arid <- effect$aridity.demartonne.annual
+
+
+clim <- read.csv("clean_data/sites_worldclim.csv")
+effect <- left_join(effect, clim, by = "site")
+
+
 
 write.csv(effect, "clean_data/rii.csv")
 
@@ -126,3 +135,24 @@ x1 <- rdm[seq(1, nrow(rdm), by = 2),]
 rii <- cbind(rii.rdm.cov, x1)
 
 write.csv(rii, "clean_data/rii_individual_rdmcover.csv")
+
+
+
+#RII not split by site
+
+rii.rich <- boot.rii(eph, treatment="Microsite", variable="Species", 999)
+rii.rich$metric <- "richness"
+
+rii.abun <- boot.rii(eph.abun, treatment="Microsite", variable="abun", 999)
+rii.abun$metric <- "abun"
+
+
+rii.rdm <- boot.rii(rdm, treatment="Microsite", variable="RDM", 999)
+rii.rdm$metric <- "rdm"
+
+rii.cov <- boot.rii(rdm, treatment="Microsite", variable="rdm.cov", 999)
+rii.cov$metric <- "cov"
+
+full.rii <- rbind(rii.rich, rii.abun, rii.rdm, rii.cov)
+write.csv(full.rii, "clean_data/fullrii.csv")
+#multiply SE by the standard error to get the confidence intervals

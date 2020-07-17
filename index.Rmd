@@ -8,18 +8,27 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 library(purrr)
+library(tidyr)
 library(ggthemes)
 library(glmmTMB)
-library(sjPlot)
+library(ggpubr)
 library(performance)
+library(gridExtra)
 ```
+***
+
+Pitfall traps were deployed along an aridity gradient in California to measure associations of ground-dwelling arthropods with foundation shrubs, and to assess the ability of residual dry matter (RDM) as an indicator of arthropod community structure.
+
+***
 
 ```{r}
 env <- read.csv("clean_data/cov.csv")
 comm <- read.csv("clean_data/comm.csv")
 rdm <- read.csv("clean_data/veg_covariates.csv")
+rdm <- filter(rdm, Microsite != "larrea")
 eph <- filter(env, Microsite != "larrea")
 str(eph)
 eph$Microsite <- as.factor(eph$Microsite)
@@ -28,89 +37,75 @@ eph$Microsite <- relevel(eph$Microsite, ref = "open")
 rdm$Microsite <- relevel(rdm$Microsite, ref = "open")
 
 se <- function(x) sd(x, na.rm = TRUE)/sqrt(length(x)) ## SE
-```
 
-***
+rii <- read.csv("clean_data/rii.csv")
+indrii <- read.csv("clean_data/rii_individual.csv")
 
-Pitfall traps were deployed along an aridity gradient in California to measure associations of ground-dwelling arthropods with foundation shrubs, and to assess the ability of residual dry matter (RDM) as an indicator of arthropod community structure.
+effect <- dplyr::select(rii, site, ESI,Max,arid)
 
-***
+eph <- left_join(eph, effect, by = "site")
+eph <- distinct(eph)
 
-## Differences between sites
+rdm <- left_join(rdm, effect, by = "site")
+rdm <- distinct(rdm)
 
+#env <- left_join(env, effect, by = "site")
+#env <- distinct(env)
 
-### Residual dry matter
-```{r}
-ggplot(rdm, aes(RDM)) + geom_density() + facet_grid(~site) + theme_classic()
-ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+eph.abun <- filter(eph, abun < 350)
+eph.abun <- distinct(eph.abun)
 
-```
-
-
-
-### Insect morphospecies richness
-```{r}
-ggplot(env, aes(Species, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)+ theme_classic()
-ggplot(env, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+eph %>% group_by(Region) %>% summarise(sum = sum(abun))
 ```
 
 
+# EDA
+
+The sites are sorted by aridity - from most arid to least arid.
 
 
-### Insect abundance
-There is one sample with 1200 insects in it, almost all ants that really throws everything off. 
+
+
+## Residual dry matter
 ```{r}
-env %>% filter(abun < 350) %>% ggplot(aes(abun, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~site)+ theme_classic()
-
-env %>% filter(abun < 350) %>% ggplot(aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site)+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-sum(env$abun)
-sum(eph$abun)
-```
-
-### Simple counts
-```{r}
-arth.lg <- read.csv("clean_data/arth_long.csv")
-arth.lg <- filter(arth.lg, highest.rtu != "damaged" & highest.rtu != "ignore" & highest.rtu != "alate")
-str(arth.lg)
-
-#this is with larrea
-sum(arth.lg$Quantity)
-
-ants <- filter(arth.lg, Family == "Formicidae") 
-sum(ants$Quantity)
-ants %>% count(highest.rtu)
-ants %>% count(morph)
-```
-
-
-## Influence of shrubs on RDM
-### Does shrub size influence RDM?
-```{r}
-ggplot(rdm, aes(x, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Width")+ theme_classic()
-
-ggplot(rdm, aes(z, RDM)) + geom_smooth() + facet_grid(~site) + xlab("Shrub Height")+ theme_classic()
+ggplot(rdm, aes(Microsite, RDM)) + geom_boxplot() + facet_grid(~reorder(site, arid))+ theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
-### Is RDM cover greater undershrubs?
+## Does shrub size influence RDM?
 ```{r}
-ggplot(rdm, aes(Microsite, rdm.cov)) + geom_boxplot() + facet_grid(~Region)
+ggplot(rdm, aes(x, RDM)) + geom_smooth() + facet_grid(~reorder(site, arid)) + xlab("Shrub Width")+ theme_classic()
+
+ggplot(rdm, aes(z, RDM)) + geom_smooth() + facet_grid(~reorder(site, arid)) + xlab("Shrub Height")+ theme_classic()
+
 ```
 
-
-## Influence of RDM on insect communities
-
-### Morphospecies richness
+## Insect morphospecies richness
 ```{r}
+ggplot(eph, aes(Species, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~reorder(site, arid))+ theme_classic()
+
 ggplot(eph, aes(RDM, Species)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+
+
+ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
 ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+
 ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
 
 ```
-### Arthropod abundance
+
+
+## Insect abundance
+There is one sample with 1200 insects in it, almost all ants that really throws everything off. 
 ```{r}
+eph %>% filter(abun < 350) %>% ggplot(aes(abun, fill = Microsite)) + geom_density(alpha = 0.7) + facet_grid(~reorder(site, arid))+ theme_classic()
+
+ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 ggplot(filter(eph, abun < 350), aes(RDM, abun)) + geom_smooth(method = lm) + geom_point() + theme_classic()
 
 ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
@@ -119,28 +114,11 @@ ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(
 ```
 
 
-## Influence of shrubs on arthropod communities
-### Arthropod morphospecies richness
-
-```{r}
-ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~Region) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggplot(eph, aes(Microsite, Species)) + geom_boxplot() + facet_grid(~site) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-### Arthropod abundance
-
-
-```{r}
-ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~Region) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-ggplot(filter(eph, abun <350), aes(Microsite, abun)) + geom_boxplot() + facet_grid(~site) + theme_classic() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
 ## Site level RII 
 ### Residual dry matter
 
 ```{r}
-rii <- read.csv("clean_data/rii.csv")
+
 ggplot(rii, aes(arid, average, color = response)) + geom_errorbar(aes(arid, ymin = average - error, ymax = average + error)) + geom_point() + geom_jitter() 
 ggplot(rii, aes(arid, average, color = response)) + geom_smooth(method = lm)
 
@@ -150,253 +128,15 @@ ggplot(rii, aes(arid, average, color = response)) + geom_smooth(method = lm)
 ## Individual RII (rdm)
 
 ```{r}
-indrii <- read.csv("clean_data/rii_individual.csv")
 ggplot(indrii, aes(site, rii)) + geom_boxplot()
 ggplot(indrii, aes(x, rii)) + geom_point() + geom_smooth(method = lm) + xlab("Shrub Width")
 ```
 
-
-
-# Models
-
-## Drivers of arthropod abundance
-
+# Counts and summaries
+## Simple counts
 ```{r}
-
-effect <- select(rii, site, ESI, arid)
-eph <- left_join(eph, effect, by = "site")
-eph.abun <- filter(eph, abun < 350)
-eph.abun <- distinct(eph.abun)
-m1 <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph.abun)
-summary(m1)
-#looks overdispersed
-
-m1.nb <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m1.nb)
-
-m1.nb1 <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
-summary(m1.nb1)
-
-m1.nb.rdm <- glmmTMB(abun ~ RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m1.nb.rdm)
-
-m2 <- glmmTMB(abun ~ Microsite * RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m2)
-
-AIC(m1, m1.nb, m1.nb1)
-
-#nbinom2 without interaction is the best
-summary(m1.nb)
-knitr::kable(car::Anova(m1.nb, type = 2))
-
-
-m1.arid <- glmmTMB(abun ~ Microsite + RDM + arid +(1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m1.arid)
-
-m2.arid <- glmmTMB(abun ~ Microsite + RDM + arid +(1|Region), family = "nbinom2", data = eph.abun)
-summary(m2.arid)
-
-m3.arid <- glmmTMB(abun ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m3.arid)
-
-m4.arid <- glmmTMB(abun ~ Microsite + RDM + arid, family = "nbinom2", data = eph.abun)
-summary(m4.arid)
-
-m5.arid <- glmmTMB(abun ~ Microsite + RDM + arid + Region, family = "nbinom2", data = eph.abun)
-summary(m5.arid)
-
-m6.arid <- glmmTMB(abun ~ Microsite + RDM + arid + (1|site), family = "nbinom2", data = eph.abun)
-summary(m6.arid)
-
-m7.arid <- glmmTMB(abun ~ Microsite + RDM + (1|site), family = "nbinom2", data = eph.abun)
-
-
-summary(m7.arid)
-AIC(m1.arid, m2.arid, m3.arid, m4.arid, m5.arid, m6.arid, m7.arid)
-
-
-
-m3 <- glmmTMB(abun ~ Microsite + rdm.cov + (1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m3)
-AIC(m1.nb, m3)
-
-m3 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM + rdm.cov + (1|site), family = "nbinom2", data = eph.abun)
-
-m4 <- glmmTMB(abun ~ Microsite + rdm.cov + RDM + rdm.cov + (1|Region/site), family = "nbinom2", data = eph.abun)
-summary(m4)
-
-AIC(m3,m4)
-
-
-knitr::kable(car::Anova(m4, type = 2))
-
-check_collinearity(m4)
-```
-
-## Insect morphospecies richness
-
-```{r}
-eph <- distinct(eph)
-m1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
-summary(m1)
-
-#nb models don't coverge -> likely suggests overdispersion not an issue but should add a formal check
-
-m1.nb <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom2", data = eph)
-
-m1.p <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "poisson", data = eph)
-anova(m1.nb, m1.p)
-
-m1.nb1 <- glmmTMB(Species ~ Microsite + RDM + (1|Region/site), family = "nbinom1", data = eph.abun)
-
-summary(aov(m1.nb, m1.nb1))
-
-m2 <- glmmTMB(Species ~ Microsite * RDM + (1|Region/site), family = "poisson", data = eph)
-summary(m2)
-
-
-plot(fitted(m2), resid(m2))
-
-AIC(m1, m2)
-
-m3.cov <- glmmTMB(Species ~ Microsite + rdm.cov + (1|Region/site), family = "poisson", data = eph)
-summary(m3.cov)
-
-m3.cov.in <- glmmTMB(Species ~ Microsite * rdm.cov + (1|Region/site), family = "poisson", data = eph)
-summary(m3.cov.in)
-
-m4 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|Region/site), family = "poisson", data = eph)
-
-
-m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|site), family = "poisson", data = eph)
-summary(m5)
-
-AIC(m4,m5)
-summary(m4)
-knitr::kable(car::Anova(m4, type = 2))
-check_collinearity(m4)
-
-
-m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + (1|site), family = "poisson", data = eph)
-summary(m5)
-
-m6 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + ESI + arid +(1|site), family = "poisson", data = eph)
-summary(m6)
-
-m7 <- glmmTMB(Species ~ Microsite + RDM*ESI + rdm.cov, family = "poisson", data = eph)
-summary(m7)
-
-AIC(m5, m6, m7)
-
-cor.test(eph$ESI, eph$arid)
-
-m5 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov + green.cov + non.veg.cov + (1|Region/site), family = "poisson", data = eph)
-
-summary(m5)
-```
-## Influence of shrub size
-```{r, shrub size}
-
-#redo models
-#shrub microsite only
-shr <- filter(eph, Microsite == "ephedra")
-
-m1.shr <- glmmTMB(Species ~ x + (1|Region/site), family = "poisson", data = shr)
-summary(m1.shr)
-
-shr.abun <- filter(eph, abun < 350)
-m2.shr <- glmmTMB(abun ~ x + z + (1|Region/site), family = "nbinom2", data = shr.abun)
-summary(m2.shr)
-
-```
-### Residual dry matter
-
-
-### RII differences between sites
-```{r}
-shapiro.test(indrii$rii)
-t.test(indrii$rii)
-#not normal though
-
-library(boot)
-bootmean <- function(d, i) mean(d[i])
-RDM.rii <- boot(indrii$rii, bootmean, R=10000, stype ="i")
-ci.RDM.rii <- boot.ci(RDM.rii)
-bca.RDM <- ci.RDM.rii$bca
-
-
-
-rii.cover <- read.csv("clean_data/rii_individual_rdmcover.csv")
-str(rii.cover)
-mean(rii.cover$rii)
-
-
-cover.rii <- boot(rii.cover$rii, bootmean, R=1000, stype ="i")
-ci.cover.rii <- boot.ci(cover.rii)
-bca.cover <- ci.cover.rii$bca
-t.test(rii.cover$rii)
-```
-
-
-```{r}
-
-#want to make a plot of site level rii vs average rii
-av <- indrii %>% group_by(site) %>% summarise(mean.rdm = mean(rii))
-mets <- filter(rii, response != 'rdm')
-av <- right_join(av, mets, by = "site") 
-
-#need to fix this
-rdm.av <- rdm %>%  group_by(site) %>% summarise(mean.rdm = mean(RDM))
-
-av <- right_join(av, rdm.av, by = "site")
-ggplot(av, aes(mean.rdm.y, average, color = response)) + geom_smooth(method = lm) + geom_point() + xlab("Mean RDM under shrub (g)") + ylab("RII")
-
-eph.rdm <- filter(rdm, Microsite != "larrea")
-ggplot(eph.rdm, aes(RDM, fill = Microsite)) + geom_density(alpha = 0.7) + theme_classic() + xlab("RDM (g)")
-
-```
-
-## Correlations
-```{r}
-
-av %>% filter(response == "richness") %>% cor.test(~mean.rdm.x + average, data =.)
-av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + average, data =.)
-
-av %>% filter(response == "richness") %>% cor.test(~mean.rdm.y + average, data =.)
-av %>% filter(response == "abun") %>% cor.test(~mean.rdm.y + average, data =.)
-
-av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + arid, data =.)
-av %>% filter(response == "abun") %>% cor.test(~mean.rdm.x + ESI, data =.)
-
-
-
-rd <- select(av, site, mean.rdm.y)
-rii <- left_join(rii, rd, by = "site")
-rii <- distinct(rii)
-
-rii %>% filter(response == "richness") %>% cor.test(~arid+ average, data =.)
-rii %>% filter(response == "abun") %>% cor.test(~arid+ average, data =.)
-
-
-
-rii %>% filter(response == "rdm") %>% cor.test(~ESI+ average, data =.)
-rii %>% filter(response == "rdm") %>% cor.test(~arid+ average, data =.)
-
-library(ggplot2)
-
-ggplot(filter(rii,response == "abun"), aes(reorder(site, arid), arid)) + geom_bar(stat="identity")
-       
-m1 <- lm(response ~ arid, data = filter(rii, response == "rdm"))
-
-
-abun.rii <- filter(rii,response == "abun")
-kruskal.test(abun.rii$region, abun.rii$average)
-
-```
-
-## Ephedra summary stats 
-```{r}
-arth.eph <- filter(arth.lg, Microsite != "larrea")
+arth <- read.csv("clean_data/arth_long.csv")
+arth.eph <- filter(arth, Microsite != "larrea")
 
 sum(arth.eph$Quantity)
 
@@ -409,66 +149,391 @@ ants %>% count(morph)
 mean(eph.abun$abun)
 sd(eph.abun$abun)
 
+order <- arth.eph %>% group_by(Order) %>% summarise(sum = sum(Quantity))
+sum(order$sum)
+
+beetles <- filter(arth.eph, Order == "Coleoptera")
+beetles %>% count(morph)
+fam <- arth.eph %>% group_by(Family) %>% summarise(sum = sum(Quantity))
+
+#how many plots contain green veg
+
+eph %>% count(green.cov == 0)
+
+```
+
+# Models
+
+## Drivers of arthropod abundance
+
+```{r}
+
+eph.abun$x[is.na(eph.abun$x == TRUE)] <- 0
+eph$x[is.na(eph$x == TRUE)] <- 0
+m1 <- glmmTMB(abun ~ Microsite + RDM + rdm.cov +  arid + ESI + (1|site), family = "poisson", data = eph.abun)
+#summary(m1)
+#looks overdispersed
+check_overdispersion(m1)
+
+m1.nb <- glmmTMB(abun ~ Microsite + RDM + rdm.cov + arid + ESI +(1|site), family = "nbinom2", data = eph.abun)
+summary(m1.nb)
+m1.nb1 <- glmmTMB(abun ~ Microsite + RDM + rdm.cov +  arid + ESI + (1|site), family = "nbinom1", data = eph.abun)
+
+AIC(m1, m1.nb, m1.nb1)
+
+#nbinom2 best family
+
+#test each rdm interaction
+
+m2 <- glmmTMB(abun ~ Microsite * RDM + rdm.cov + green.cov + arid + ESI + (1|site), family = "nbinom2", data = eph.abun)
+summary(m2)
+m3 <- glmmTMB(abun ~ Microsite * rdm.cov + RDM + green.cov + arid + ESI + (1|site), family = "nbinom2", data = eph.abun)
+summary(m3)
+
+AIC(m1.nb, m2, m3)
+#interactions are non-significant and do not improve the model. Dropping.
 
 
+check_collinearity(m1.nb)
+
+
+summary(m1.nb)
+knitr::kable(car::Anova(m1.nb, type = 2))
+```
+
+## Insect morphospecies richness
+
+```{r}
+
+m4 <- glmmTMB(Species ~ Microsite + RDM + rdm.cov +  arid + ESI + (1|site), family = "nbinom2", data = eph)
+summary(m4)
+
+#nb models don't coverge -> likely suggests overdispersion not an issue but should add a formal check
+
+
+m4.p <- glmmTMB(Species ~ Microsite + RDM + rdm.cov +  arid + ESI +(1|site), family = "poisson", data = eph)
+
+check_overdispersion(m4.p)
+
+#wow wow, I can actually use a poisson model 
+
+#check each interaction
+
+m5 <- glmmTMB(Species ~ Microsite * RDM + rdm.cov +  arid + ESI + (1|site), family = "poisson", data = eph)
+
+m6 <- glmmTMB(Species ~ Microsite * rdm.cov + RDM +  arid + ESI + (1|site), family = "poisson", data = eph)
+
+m7 <- glmmTMB(Species ~ Microsite * ESI+ rdm.cov + RDM +  arid + (1|site), family = "poisson", data = eph)
+
+AIC(m4.p, m5, m6)
+
+#no interactions 
+
+check_collinearity(m4.p)
+summary(m4.p)
+knitr::kable(car::Anova(m4.p, type = 2))
+
+```
+## Influence of shrub size
+
+```{r, shrub size}
+
+#redo models
+#shrub microsite only
+shr <- filter(eph, Microsite == "ephedra")
+
+m1.shr <- glmmTMB(Species ~ x + z + (1|site), family = "poisson", data = shr)
+summary(m1.shr)
+knitr::kable(car::Anova(m1.shr, type = 2))
+
+shr.abun <- filter(shr, abun < 350)
+m2.shr <- glmmTMB(abun ~ x + z + (1|site), family = "nbinom2", data = shr.abun)
+summary(m2.shr)
+knitr::kable(car::Anova(m2.shr, type = 2))
+```
+
+# RII
+Data wrangling and calculations for RII are in RII.R
+
+
+Bootstrap the mean and 95% CI for RII rdm biomass and rdm cover. These calculations are made at the individual level (n = 30 for each of nine sites) and the RII represents all nine sites
+```{r}
+shapiro.test(indrii$rii)
+t.test(indrii$rii)
+#not normal though
+
+library(boot)
+bootmean <- function(d, i) mean(d[i])
+
+#rdm biomass
+
+RDM.rii <- boot(indrii$rii, bootmean, R=10000, stype ="i")
+ci.RDM.rii <- boot.ci(RDM.rii)
+bca.RDM <- ci.RDM.rii$bca
+
+#rdm cover
+
+rii.cover <- read.csv("clean_data/rii_individual_rdmcover.csv")
+str(rii.cover)
+mean(rii.cover$rii)
+
+cover.rii <- boot(rii.cover$rii, bootmean, R=1000, stype ="i")
+ci.cover.rii <- boot.ci(cover.rii)
+bca.cover <- ci.cover.rii$bca
+t.test(rii.cover$rii)
+```
+
+
+```{r}
+site.rii <- read.csv("clean_data/rii.csv")
+#want to make a plot of site level rii vs average rii
+
+site.rii <- dplyr::select(site.rii, 3:6, 13, 14, ESI, arid, Max)
+
+#for each site, calculate the mean RDM biomass and cover for the whole site and also just under shrubs
+
+#need to fix this
+site.rii <- rdm %>% dplyr::select(site, RDM, rdm.cov) %>% group_by(site) %>% summarise(mean.rdm.biomass = mean(RDM), mean.rdm.cov = mean(rdm.cov)) %>% right_join(., site.rii, by = "site")
+
+site.rii <- rdm %>% filter(Microsite == "ephedra") %>% dplyr::select(site, RDM, rdm.cov) %>% group_by(site) %>% summarise(shr.rdm.biomass = mean(RDM), shr.rdm.cov = mean(rdm.cov)) %>% right_join(., site.rii, by = "site")
+
+
+```
+
+## Correlations
+```{r}
+
+#relative effects
+rel.rii <- pivot_wider(site.rii, site, names_from = response, values_from = average)
+
+cor.test(rel.rii$richness, rel.rii$rdm)
+cor.test(rel.rii$richness, rel.rii$cov)
+
+cor.test(rel.rii$abun, rel.rii$rdm)
+cor.test(rel.rii$abun, rel.rii$cov)
+
+cor.test(rel.rii$rdm, rel.rii$cov)
+cor.test(rel.rii$abun, rel.rii$richness)
+
+
+
+#environmental: aridity and stress
+site.rii %>% filter(response == "richness") %>% cor.test(~ESI + average, data =.)
+site.rii %>% filter(response == "richness") %>% cor.test(~arid + average, data =.)
+site.rii %>% filter(response == "richness") %>% cor.test(~Max + average, data =.)
+
+site.rii %>% filter(response == "richness") %>% cor.test(~shr.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "richness") %>% cor.test(~shr.rdm.cov + average, data =.)
+site.rii %>% filter(response == "richness") %>% cor.test(~mean.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "richness") %>% cor.test(~mean.rdm.cov + average, data =.)
+
+
+site.rii %>% filter(response == "abun") %>% cor.test(~ESI + average, data =.)
+site.rii %>% filter(response == "abun") %>% cor.test(~arid + average, data =.)
+site.rii %>% filter(response == "abun") %>% cor.test(~Max + average, data =.)
+site.rii %>% filter(response == "abun") %>% cor.test(~shr.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "abun") %>% cor.test(~shr.rdm.cov + average, data =.)
+site.rii %>% filter(response == "abun") %>% cor.test(~mean.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "abun") %>% cor.test(~mean.rdm.cov + average, data =.)
+
+
+site.rii %>% filter(response == "rdm") %>% cor.test(~ESI + average, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~arid + average, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~Max + average, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~shr.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~shr.rdm.cov + average, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~mean.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~mean.rdm.cov + average, data =.)
+
+site.rii %>% filter(response == "cov") %>% cor.test(~ESI + average, data =.)
+site.rii %>% filter(response == "cov") %>% cor.test(~arid + average, data =.)
+site.rii %>% filter(response == "cov") %>% cor.test(~Max + average, data =.)
+site.rii %>% filter(response == "cov") %>% cor.test(~shr.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "cov") %>% cor.test(~shr.rdm.cov + average, data =.)
+site.rii %>% filter(response == "cov") %>% cor.test(~mean.rdm.biomass + average, data =.)
+site.rii %>% filter(response == "cov") %>% cor.test(~mean.rdm.cov + average, data =.)
+
+
+
+
+site.rii %>% filter(response == "rdm") %>% cor.test(~ESI+ mean.rdm.biomass, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~arid+ mean.rdm.biomass, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~ESI+ mean.rdm.cov, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~arid+ mean.rdm.cov, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~ESI+ shr.rdm.biomass, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~arid+ shr.rdm.biomass, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~ESI+ shr.rdm.cov, data =.)
+site.rii %>% filter(response == "rdm") %>% cor.test(~arid+ shr.rdm.cov, data =.)
+
+
+ggplot(filter(rii,response == "abun"), aes(reorder(site, arid), arid)) + geom_bar(stat="identity")
+      
+
+```
+
+
+# Figures
+```{r}
 #let's make a few summary figures
 #these only have the trap spots
 
-#by region
-region.mean <- data.frame()
 
-region.mean <- eph.abun %>% group_by(Region, Microsite) %>% summarise(mean.abun = mean(abun),  mean.rich = mean(Species))  %>% gather(var, mean, 3:4)
+#let's do without the regions
+abun <- eph.abun %>% group_by(Microsite) %>% summarise(mean.abun = mean(abun), se.abun = se(abun))   
 
-region.mean.plant <- data.frame()
-region.mean.plant <- eph.rdm %>% group_by(Region, Microsite) %>% summarise(mean.RDM = mean(RDM, na.rm = TRUE),  mean.cover = mean(rdm.cov, na.rm = TRUE)) %>% gather(var, mean, 3:4)
-
-region.se <- eph.abun %>% group_by(Region, Microsite) %>% summarise(se.abun = se(abun), se.rich = se(Species)) %>% gather(var, se, 3:4)
-
-region.se.plant <- eph.rdm %>% group_by(Region, Microsite) %>% summarise(se.RDM = se(RDM), se.cover = se(rdm.cov)) %>% gather(var, se, 3:4)
+rich <- eph %>% group_by(Microsite) %>% summarise(mean.rich = mean(Species), se.rich = se(Species))   
 
 
-region.summ <-data.frame()
-region.mean <- rbind(region.mean, region.mean.plant)
-region.se <- rbind(region.se, region.se.plant)
+rdm.summ <- rdm %>% group_by(Microsite) %>% summarise(mean.RDM = mean(RDM, na.rm = TRUE),  mean.cover = mean(rdm.cov, na.rm = TRUE), se.RDM = se(RDM), se.rd.cov = se(rdm.cov))
 
-region.summ <- cbind(region.mean, region.se)
-region.summ <- region.summ[, -c(5:7)]
+get_legend<-function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
 
 
-region.summ$Region <- factor(region.summ$Region, levels = c("Panoche", "Cuyama", "Mojave"))
-region.summ$var <- factor(region.summ$var, levels = c("mean.RDM", "mean.cover", "mean.abun", "mean.rich"))
-region.summ$Microsite <- factor(region.summ$Microsite, levels = c("ephedra", "open"))
+plot <- ggplot(rdm.summ, aes(Microsite, mean.RDM, fill = Microsite)) + geom_bar(color = "black", stat = "identity", width = 0.95, position = position_dodge(width=0.5)) + geom_errorbar(aes(Microsite, ymin = mean.RDM - se.RDM, ymax = mean.RDM + se.RDM), width = 0.15)  + ggtitle("RDM biomass (g)") + ylab("Mean")  + xlab("") +
+      theme(aspect.ratio = 1.5/1)  + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black")) +theme(
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank()) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(legend.position = "bottom")
 
-labels <- c(mean.RDM = "RDM biomass (g)", mean.cover = "RDM cover", mean.abun = "Arthropod abundance", mean.rich = "Arthropod richness")
+legend <- get_legend(plot)
 
-ggplot(region.summ, aes(Region, mean, colour = Microsite)) + geom_point(position=position_dodge(width=0.9), aes(y=mean, colour=Microsite)) + geom_errorbar(aes(Region,  ymax = mean + se, ymin = mean - se), position = "dodge") + facet_wrap(.~var, scales = "free", labeller = labeller(var = labels)) + theme_bw(base_size = 16) + scale_colour_manual(values = c("black", "red")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + ylab("Mean")
 
+
+a <- ggplot(rdm.summ, aes(Microsite, mean.RDM, fill = Microsite)) + geom_bar(color = "black", stat = "identity", width = 0.95, position = position_dodge(width=0.5)) + geom_errorbar(aes(Microsite, ymin = mean.RDM - se.RDM, ymax = mean.RDM + se.RDM), width = 0.15)  + ggtitle("RDM biomass (g)") + ylab("")  + xlab("") +
+      theme(aspect.ratio = 1.5/1) + theme(legend.position = "none") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black")) +theme(
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank()) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+
+
+a
+
+#make axis lines black, add black outline to bars, and remove grid lines
+#make a 4 panel with a common y label and legend
+
+b <- ggplot(rdm.summ, aes(Microsite, mean.cover, fill = Microsite)) + geom_bar(color = "black",stat = "identity") + geom_errorbar(aes(Microsite, ymin = mean.cover - se.rd.cov, ymax = mean.cover + se.rd.cov), width = 0.2) + ggtitle("RDM cover (%)") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))+ ylab("")  + xlab("") +
+      theme(aspect.ratio = 1.5/1)+ theme(legend.position = "none")+ theme(
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank()) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+b
+
+
+c <- ggplot(rich, aes(Microsite, mean.rich, fill = Microsite)) + geom_bar(color = "black",stat = "identity") + geom_errorbar(aes(Microsite, ymin = mean.rich - se.rich, ymax = mean.rich + se.rich), width = 0.2) + ggtitle("Arthropod richness") +theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))+ ylab("")  + xlab("") +
+      theme(aspect.ratio = 1.5/1)+ theme(legend.position = "none") +theme(
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank()) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+c
+
+
+d <- ggplot(abun, aes(Microsite, mean.abun, fill = Microsite)) + geom_bar(color = "black",stat = "identity") + geom_errorbar(aes(Microsite, ymin = mean.abun - se.abun, ymax = mean.abun + se.abun), width = 0.2) + ggtitle("Arthropod abundance") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))+ ylab("")  + xlab("") +
+      theme(aspect.ratio = 1.5/1)+ theme(legend.position = "none")+theme(
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank()) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+d
+
+library(grid)
+
+
+grid.arrange(a, b, c, d, legend, ncol = 2, nrow = 3, layout_matrix = rbind(c(1,2),c(3,4), c(5,5)), heights = c(2.5, 2.5, 0.4),  left = textGrob("Mean", gp=gpar(fontfamily = "",cex=1.5), rot = 90, vjust = 1))
 ```
 
+Figure 2 RII
+```{r}
+full.rii <- read.csv("clean_data/fullrii.csv")
+full.rii <- mutate(full.rii, ci = 1.96*error)
+
+full.rii$metric <- factor(full.rii$metric, levels = c("abun", "richness", "cov", "rdm"))
+
+ggplot(full.rii, aes(x=metric, y=average)) + geom_errorbar(aes(ymin=average-ci, ymax=average + ci), width=.1, position= position_dodge(width = 0.5)) + geom_point(aes(metric, average), position=position_dodge(width=0.5), colour="black", fill = "black", pch=21, size=4) + ylim(1, -1) + theme(axis.text.x=element_text(angle=90, vjust=.5)) + ylab("RII") + xlab("") + geom_hline(aes(yintercept=0))  + coord_flip() + scale_x_discrete(labels = c("Arthropod abundance", "Arthropod richness", "RDM cover", "RDM biomass")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))
+```
+
+
+Figure 3 Scatterplots/correlation coefficients
 
 ```{r}
-ggplot(eph, aes(RDM, Species)) + geom_smooth(method = lm) + geom_point() + theme_classic()
-ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
-ggplot(eph, aes(RDM, Species, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
+a <- ggplot(rel.rii, aes(rdm, richness)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RII Arthropod Richness") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
 
+b <- ggplot(rel.rii, aes(cov, richness)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+
+c <- ggplot(rel.rii, aes(rdm, abun)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + xlab("Mean RII RDM Biomass") + ylab("Mean RII Arthropod Abundance") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black")) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+
+d <- ggplot(rel.rii, aes(cov, abun)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + xlab("Mean RII RDM cover") + ylab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+
+grid.arrange(a, b, c, d, ncol = 2)
 ```
-### Arthropod abundance
+
+Figure 4 - Aridty and ESI vs RII
 ```{r}
-ggplot(filter(eph, abun < 350), aes(RDM, abun)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+#so many scatters, let's do a 3 by 2
+a <- ggplot(filter(site.rii, response == "rdm"), aes(arid, mean.rdm.biomass)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RDM Biomass") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+a
+b <-  ggplot(filter(site.rii, response == "rdm"), aes(ESI, mean.rdm.biomass)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+b
 
-ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic()
+c <- ggplot(filter(site.rii, response == "rdm"), aes(arid, mean.rdm.cov)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RDM Cover") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+c
+d <-  ggplot(filter(site.rii, response == "rdm"), aes(ESI, mean.rdm.cov)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+d
 
-ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(method = lm) + geom_point() + theme_classic() + facet_grid(~Region)
+e <- ggplot(filter(site.rii, response == "rdm"), aes(arid, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RII Biomass") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+e
+f <-  ggplot(filter(site.rii, response == "rdm"), aes(ESI, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+f
+g <- ggplot(filter(site.rii, response == "cov"), aes(arid, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RII Cover") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+g
+h <-  ggplot(filter(site.rii, response == "cov"), aes(ESI, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+h
+
+i <- ggplot(filter(site.rii, response == "richness"), aes(arid, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RII Richness") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+i
+j <-  ggplot(filter(site.rii, response == "richness"), aes(ESI, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+j
+
+
+k <- ggplot(filter(site.rii, response == "abun"), aes(arid, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("Mean RII Abundance") + xlab("Aridity") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+k
+l <-  ggplot(filter(site.rii, response == "abun"), aes(ESI, average)) + geom_point() + geom_smooth(method = "lm") + stat_cor() + ylab("") + xlab("Evaporative Stress Index") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+l
+
+
+grid.arrange(a, b, c, d, e, f, g, h, i, j, k, l, ncol = 2)
+
 
 
 ```
 
+Appendix figures
 
-
-# Summary of results
+```{r, appendix figures}
+ggplot(eph, aes(RDM, fill = Microsite)) + geom_density(alpha = 0.7) + theme_classic() + xlab("RDM (g)")
+```
+# Conclusions
 
 * Ephedra signficantly influences insect abundance and richness
 * Ephedra supports greater plant biomass
 
-# Future analyses?
-* Lavaan structural equation modelling does not support count data

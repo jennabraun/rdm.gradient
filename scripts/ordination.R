@@ -2,7 +2,6 @@
 
 library(vegan)
 library(ggfortify)
-library(tidyverse)
 library(ggvegan)
 
 comm <- read.csv("clean_data/comm_eph.csv")
@@ -27,22 +26,23 @@ comm.bc.mds
 
 
 
-gof <- goodness
-
 a1 <- adonis(comm.bc.dist ~ Microsite * RDM + rdm.cov, data = env)
 a1
 
 
 #comm <- decostand(comm, method = "hellinger")
 #not transforming for CCA
-r1 <- cca(comm ~ Microsite  + rdm.cov + arid + ESI + Region, data = env)
+r1 <- cca(comm ~ Microsite  + rdm.cov + RDM +  site,  data = env)
 summary(r1)
 r1
+alias(r1, names = TRUE)
 goodness(r1)
 a1 <- anova(r1, by = "margin")
-anova(r1, by = "axis")
 a1
+a2 <- anova(r1, by = "terms")
+a2
 
+anova(r1, by = "axis")
 
 test <- autoplot(r1, layers = "species", data = env) + theme_bw()
 
@@ -64,7 +64,7 @@ ggplot(pca_fort, aes(x = CCA1, y = CCA2, colour = Microsite, shape = Region, siz
 #test for dissimilarity
 a1 <- anosim(comm, env$Microsite, permutations = 999, distance = "bray")
 summary(a1)
-a2 <- anosim(comm, env$site, permutations = 999, distance = "bray")
+a2 <- anosim(comm, env$Region, permutations = 999, distance = "bray")
 summary(a2)
 
 ggbiplot(r1)
@@ -88,3 +88,5 @@ eph$group <- paste(eph$Region, eph$Microsite)
 library(indicspecies)
 indval <- multipatt(comm, eph$group, control = how(nperm=999))
 summary(indval)
+
+adonis(comm ~ Microsite  + rdm.cov + RDM + arid + ESI, data = env, strata = env$site)
