@@ -185,15 +185,15 @@ AIC(m1, m1.nb, m1.nb1)
 
 #test each rdm interaction
 
-m2 <- glmmTMB(abun ~ Microsite * RDM + rdm.cov + green.cov + arid + ESI + (1|site), family = "nbinom2", data = eph.abun)
+m2 <- glmmTMB(abun ~ Microsite * RDM + rdm.cov  + arid + ESI + (1|site), family = "nbinom2", data = eph.abun)
 summary(m2)
-m3 <- glmmTMB(abun ~ Microsite * rdm.cov + RDM + green.cov + arid + ESI + (1|site), family = "nbinom2", data = eph.abun)
+m3 <- glmmTMB(abun ~ Microsite * rdm.cov + RDM + arid + ESI + (1|site), family = "nbinom2", data = eph.abun)
 summary(m3)
 
 AIC(m1.nb, m2, m3)
 #interactions are non-significant and do not improve the model. Dropping.
-
-
+anova(m1.nb, m2)
+anova(m1.nb, m3)
 check_collinearity(m1.nb)
 
 
@@ -220,13 +220,16 @@ check_overdispersion(m4.p)
 #check each interaction
 
 m5 <- glmmTMB(Species ~ Microsite * RDM + rdm.cov +  arid + ESI + (1|site), family = "poisson", data = eph)
+summary(m5)
 
 m6 <- glmmTMB(Species ~ Microsite * rdm.cov + RDM +  arid + ESI + (1|site), family = "poisson", data = eph)
+summary(m6)
 
 m7 <- glmmTMB(Species ~ Microsite * ESI+ rdm.cov + RDM +  arid + (1|site), family = "poisson", data = eph)
 
 AIC(m4.p, m5, m6)
-
+anova(m4.p, m5)
+anova(m4.p, m6)
 #no interactions 
 
 check_collinearity(m4.p)
@@ -406,7 +409,7 @@ eph$label <- as.factor(eph$label)
 
 a <- ggplot(rdm, aes(label, RDM, fill = Microsite)) +  
  stat_boxplot(geom ='errorbar')+ geom_boxplot() + ylab("RDM Biomass (g)") + theme(legend.position = "none") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + stat_summary(fun=mean, colour="black", geom="point", shape=18, size=3, position=position_dodge(.8)) + scale_fill_manual(values=c("white", "gray"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + stat_summary(fun=mean, colour="black", geom="point", shape=18, size=3, position=position_dodge(.8)) + scale_fill_manual(values=c("white", "gray")) + theme(legend.box = "horizontal", legend.position = c(0.9, 0.9), legend.title = element_blank())
 a
 
 b <- ggplot(rdm, aes(label, rdm.cov, fill = Microsite))  +  
@@ -439,7 +442,7 @@ for (i in 1:length(grobs)){
 
 p <- do.call("grid.arrange", c(grobs, ncol = 1))
 
-grid.arrange(p, l1, ncol = 1,  heights = c(1, 0.1))
+#grid.arrange(p, l1, ncol = 1,  heights = c(1, 0.1))
 ```
 
 
@@ -465,7 +468,7 @@ group.colors <- c("#000000", hue_pal()(9))
 names( group.colors ) <- LETTERS[1:4]; group.colors
 
 
-rii.plot <- ggplot(test, aes(x=response, y=average)) + geom_point(aes(response, average,  color = label), position = position_dodge(width = 0.7),  size=4)+ geom_errorbar(aes(ymin=average-ci, ymax=average + ci, color = label), width=.1, position= position_dodge(width = 0.7))  + ylim(-1, 1) + theme(axis.text.x=element_text(angle=90, vjust=.5)) + ylab("RII") + xlab("") + geom_hline(aes(yintercept=0))  + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+rii.plot <- ggplot(test, aes(x=response, y=average)) + geom_point(aes(response, average,  color = label), position = position_dodge(width = 0.7),  size=4)+ geom_errorbar(aes(ymin=average-error, ymax=average + error, color = label), width=.1, position= position_dodge(width = 0.7))  + ylim(-1, 1) + theme(axis.text.x=element_text(angle=90, vjust=.5)) + ylab("RII") + xlab("") + geom_hline(aes(yintercept=0))  + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 panel.background = element_blank(), axis.line = element_line(colour = "black")) + scale_x_discrete(labels = c("RDM Biomass", "RDM Cover", "Arthropod Richnes", "Arthropod Abundance")) +  scale_colour_manual( values= group.colors, name = "Sites")
 
 rii.plot 
@@ -499,7 +502,7 @@ fit1 <- lm(richness ~ cov, rel.rii)
 b <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$model)[1])) + 
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
-  geom_label(aes(x = 0.3, y = 0.23),vjust=1, hjust = 0, 
+  geom_label(aes(x = 0.25, y = 0.23),vjust=1, hjust = 0, 
              label = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5)))  + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
@@ -510,7 +513,7 @@ fit1 <- lm(abun ~ rdm, rel.rii)
 c <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$model)[1])) + 
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
-  geom_label(aes(x = 0.3, y = 0.23),vjust=1, hjust = 0, 
+  geom_label(aes(x = -0, y = 0.65),vjust=1, hjust = 0, 
              label = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + xlab("Mean RII RDM Biomass") + ylab("Mean RII Arthropod Abundance") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 panel.background = element_blank(), axis.line = element_line(colour = "black")) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
@@ -520,7 +523,7 @@ fit1 <- lm(abun ~ cov, rel.rii)
 d <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$model)[1])) + 
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
-  geom_label(aes(x = 0.3, y = 0.23),vjust=1, hjust = 0, 
+  geom_label(aes(x = 0.24, y = 0.65),vjust=1, hjust = 0, 
              label = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + xlab("Mean RII RDM cover") + ylab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
@@ -594,7 +597,7 @@ fit1 <- filter(site.rii, response == "rdm") %>% lm(average ~ ESI,.)
 f <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$model)[1])) + 
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
-  geom_label(aes(x = 0.02, y = 0.78),vjust=1, hjust = 0, 
+  geom_label(aes(x = 0.03, y = 0.78),vjust=1, hjust = 0, 
              label = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
@@ -604,7 +607,7 @@ fit1 <- filter(site.rii, response == "cov") %>% lm(average ~ arid,.)
 g <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$model)[1])) + 
   geom_point() +
   stat_smooth(method = "lm", col = "red") +
-  geom_label(aes(x = 0.04, y = 0.7),vjust=1, hjust = 0, 
+  geom_label(aes(x = 4, y = 0.75),vjust=1, hjust = 0, 
              label = paste("Adj R2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("Mean RII Cover") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
 panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
