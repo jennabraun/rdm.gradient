@@ -687,6 +687,9 @@ for (i in 1:length(grobs)){
 p <- do.call("grid.arrange", c(grobs, ncol = 2))
 p
 
+
+full.rii <- mutate(full.rii, upperCI = average + ci, lowerci = average - ci)
+
 ```
 
 Appendix figures
