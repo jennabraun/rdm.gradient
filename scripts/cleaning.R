@@ -24,28 +24,33 @@ arth <- filter(arth, highest.rtu != "alate" & highest.rtu != "ignore" & highest.
 sum(arth$Quantity)
 
 write.csv(arth, "clean_data/arth_long.csv")
+arth <- read.csv("clean_data/arth_long.csv")
 #aggregrate observations
+arth <- filter(arth, Order != "Lepidoptera")
 arth.ag <- dplyr::select(arth, uniID, morph, Quantity)
 arth.ag <- arth.ag %>% group_by(uniID, morph) %>% summarise(Quantity = sum(Quantity)) 
 sum(arth.ag$Quantity)
 
 arth.ag$morph <- gsub(" ","", arth.ag$morph)
 
+
 wide <- arth.ag %>% spread(morph, Quantity)
 wide[is.na(wide)] <- 0
-
+row.names(wide) <- wide$uniID
 ##make metadata dataframe
 metadata <- rdm
 metadata$uniID <- paste(metadata$site, metadata$Microsite, metadata$ID)
-
-
 row.names(metadata) <- metadata$uniID
-row.names(wide) <- wide$uniID
+
+#row.names(metadata) <- metadata$uniID
+
 metadata <- metadata[match(wide$uniID, metadata$uniID),]
+
 missing <- anti_join(wide, metadata, by = "uniID")
+all.equal(rownames(wide), rownames(metadata))
 wide <- wide %>% ungroup(uniID) %>% select(-uniID)
 
-all.equal(rownames(wide), rownames(metadata))
+
 metadata$abun <- apply(wide, 1, sum)
 #check for total
 sum(metadata$abun)
@@ -83,7 +88,7 @@ sum(arth.ag$Quantity)
 arth.ag$morph <- gsub(" ","", arth.ag$morph)
 wide.eph <- arth.ag %>% spread(morph, Quantity)
 wide.eph[is.na(wide.eph)] <- 0
-
+row.names(metadata) <- metadata$uniID
 row.names(wide.eph) <- wide.eph$uniID
 metadata <- metadata[match(wide.eph$uniID, metadata$uniID),]
 missing <- anti_join(wide.eph, metadata, by = "uniID")
@@ -106,7 +111,7 @@ metadata$Even <- J
 
 write.csv(metadata, "clean_data/cov_eph.csv")
 write.csv(wide.eph, "clean_data/comm_eph.csv")
-
+write.csv(wide, "clean_data/comm.csv")
 #make a data frame of the regions each morphospecies is found
 arth$pres <- "Y"
 arth <- select(arth, morph, Region, pres)

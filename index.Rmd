@@ -28,8 +28,9 @@ Pitfall traps were deployed along an aridity gradient in California to measure a
 env <- read.csv("clean_data/cov.csv")
 comm <- read.csv("clean_data/comm.csv")
 rdm <- read.csv("clean_data/veg_covariates.csv")
-rdm <- filter(rdm, Microsite != "larrea")
-eph <- filter(env, Microsite != "larrea")
+#rdm <- filter(rdm, Microsite != "larrea")
+eph <- filter(env)
+sum(eph$abun)
 str(eph)
 eph$Microsite <- as.factor(eph$Microsite)
 rdm$Microsite <- as.factor(rdm$Microsite)
@@ -147,6 +148,7 @@ ants %>% count(morph)
 
 
 mean(eph.abun$abun)
+sum(eph.abun$abun)
 sd(eph.abun$abun)
 
 order <- arth.eph %>% group_by(Order) %>% summarise(sum = sum(Quantity))
@@ -210,7 +212,7 @@ summary(m4)
 
 #nb models don't coverge -> likely suggests overdispersion not an issue but should add a formal check
 
-
+eph <- filter(eph, Microsite != "larrea")
 m4.p <- glmmTMB(Species ~ Microsite + RDM + rdm.cov +  arid + ESI +(1|site), family = "poisson", data = eph)
 
 check_overdispersion(m4.p)
