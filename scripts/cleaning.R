@@ -112,6 +112,9 @@ metadata$Even <- J
 write.csv(metadata, "clean_data/cov_eph.csv")
 write.csv(wide.eph, "clean_data/comm_eph.csv")
 write.csv(wide, "clean_data/comm.csv")
+
+
+
 #make a data frame of the regions each morphospecies is found
 arth$pres <- "Y"
 arth <- select(arth, morph, Region, pres)
