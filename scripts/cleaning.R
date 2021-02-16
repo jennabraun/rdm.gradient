@@ -15,7 +15,7 @@ arth$Microsite <- as.factor(arth$Microsite)
 arth$Microsite <- gsub(" ", "", arth$Microsite)
 arth$Microsite <- gsub("shrub", "ephedra", arth$Microsite)
 arth$uniID <- paste(arth$Site, arth$Microsite, arth$Rep)
-arth$morph <- paste(arth$highest.rtu, arth$Morpho_code)
+arth$morph <- paste(arth$highest.rtu)
 
 
 #filter out ignores
