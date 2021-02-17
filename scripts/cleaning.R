@@ -15,7 +15,6 @@ arth$Microsite <- as.factor(arth$Microsite)
 arth$Microsite <- gsub(" ", "", arth$Microsite)
 arth$Microsite <- gsub("shrub", "ephedra", arth$Microsite)
 arth$uniID <- paste(arth$Site, arth$Microsite, arth$Rep)
-arth$morph <- paste(arth$highest.rtu)
 
 
 #filter out ignores
@@ -27,14 +26,14 @@ write.csv(arth, "clean_data/arth_long.csv")
 arth <- read.csv("clean_data/arth_long.csv")
 #aggregrate observations
 arth <- filter(arth, Order != "Lepidoptera")
-arth.ag <- dplyr::select(arth, uniID, morph, Quantity)
-arth.ag <- arth.ag %>% group_by(uniID, morph) %>% summarise(Quantity = sum(Quantity)) 
+arth.ag <- dplyr::select(arth, uniID, highest.rtu, Quantity)
+arth.ag <- arth.ag %>% group_by(uniID, highest.rtu) %>% summarise(Quantity = sum(Quantity)) 
 sum(arth.ag$Quantity)
 
-arth.ag$morph <- gsub(" ","", arth.ag$morph)
+arth.ag$highest.rtu <- gsub(" ","", arth.ag$highest.rtu)
 
 
-wide <- arth.ag %>% spread(morph, Quantity)
+wide <- arth.ag %>% spread(highest.rtu, Quantity)
 wide[is.na(wide)] <- 0
 row.names(wide) <- wide$uniID
 ##make metadata dataframe
@@ -78,55 +77,18 @@ write.csv(metadata, "clean_data/cov.csv")
 write.csv(wide, "clean_data/comm.csv")
 
 
-#I want the same community and env without ephedra
-arth.ag <- dplyr::select(arth, uniID, morph, Microsite, Quantity)
-arth.ag <- filter(arth.ag, Microsite != "larrea")
-#arth.ag <- filter(arth.ag, uniID != "PAN2 open 11")
-arth.ag <- arth.ag %>% group_by(uniID, morph) %>% summarise(Quantity = sum(Quantity)) 
-sum(arth.ag$Quantity)
-
-arth.ag$morph <- gsub(" ","", arth.ag$morph)
-wide.eph <- arth.ag %>% spread(morph, Quantity)
-wide.eph[is.na(wide.eph)] <- 0
-row.names(metadata) <- metadata$uniID
-row.names(wide.eph) <- wide.eph$uniID
-metadata <- metadata[match(wide.eph$uniID, metadata$uniID),]
-missing <- anti_join(wide.eph, metadata, by = "uniID")
-wide.eph <- wide.eph %>% ungroup(uniID) %>% select(-uniID)
-
-all.equal(rownames(wide.eph), rownames(metadata))
-metadata$abun <- apply(wide.eph, 1, sum)
-#check for total
-sum(metadata$abun)
-H <- diversity(wide.eph)
-simp <- diversity(wide.eph, "simpson")
-S <- specnumber(wide.eph)
-J <- H/log(S)
-metadata$H <- H
-metadata$Simpson <- simp
-metadata$Species <- S
-metadata$Even <- J
-
-
-
-write.csv(metadata, "clean_data/cov_eph.csv")
-write.csv(wide.eph, "clean_data/comm_eph.csv")
-write.csv(wide, "clean_data/comm.csv")
-
-
-
 #make a data frame of the regions each morphospecies is found
-arth$pres <- "Y"
-arth <- select(arth, morph, Region, pres)
-arth <- distinct(arth)
-regions <- arth %>% pivot_wider(., morph, names_from = Region, values_from = pres)
-write.csv(regions, "clean_data/regions.csv")
-morphs <- read.csv("clean_data/morphospecies_descriptions.csv")
-
-
-morphs$morph <- paste(morphs$highest.taxanomic.resolution, morphs$Morphotype)
-morphs$morph <- gsub(" ", "", morphs$morph)
-regions$morph <- gsub(" ", "", regions$morph)
-morphs <- left_join(morphs, regions, by = "morph")
-a <- filter(morphs, is.na(Cuyama) == TRUE & is.na(Mojave) == TRUE & is.na(Panoche == "TRUE"))
-write.csv(morphs, "clean_data/morphospecies_descriptions.csv")
+# arth$pres <- "Y"
+# arth <- select(arth, morph, Region, pres)
+# arth <- distinct(arth)
+# regions <- arth %>% pivot_wider(., morph, names_from = Region, values_from = pres)
+# write.csv(regions, "clean_data/regions.csv")
+# morphs <- read.csv("clean_data/morphospecies_descriptions.csv")
+# 
+# 
+# morphs$morph <- paste(morphs$highest.taxanomic.resolution, morphs$Morphotype)
+# morphs$morph <- gsub(" ", "", morphs$morph)
+# regions$morph <- gsub(" ", "", regions$morph)
+# morphs <- left_join(morphs, regions, by = "morph")
+# a <- filter(morphs, is.na(Cuyama) == TRUE & is.na(Mojave) == TRUE & is.na(Panoche == "TRUE"))
+# write.csv(morphs, "clean_data/morphospecies_descriptions.csv")

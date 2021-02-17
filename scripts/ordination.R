@@ -4,10 +4,10 @@ library(vegan)
 library(ggfortify)
 library(ggvegan)
 
-comm <- read.csv("clean_data/comm_eph.csv")
+comm <- read.csv("clean_data/comm.csv")
 row.names(comm) <- comm$X
 comm <- comm[,-1]
-env <- read.csv("clean_data/cov_eph.csv")
+env <- read.csv("clean_data/cov.csv")
 
 
 env <- left_join(env, effect, by = "site")
