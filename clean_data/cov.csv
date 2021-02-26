@@ -68,7 +68,7 @@
 "M2 open 10","Mojave","M2",10,"open",0,NA,NA,NA,2,NA,0,0,0,100,NA,NA,NA,"Y","july.4","july.7","july.7",NA,"M2 open 10",10,1.31383403319275,0.72,4,0.947730922119161
 "M2 open 14","Mojave","M2",14,"open",0.0872,NA,NA,NA,2,NA,3,4,0,96,NA,NA,NA,"Y","july.4","july.7","july.7",NA,"M2 open 14",13,1.60520710745546,0.769230769230769,6,0.895883144486481
 "M2 open 18","Mojave","M2",18,"open",0.3986,NA,NA,NA,0,NA,5,3,0,97,NA,NA,NA,"Y","july.5","july.8","july.8",NA,"M2 open 18",28,1.65485762837566,0.711734693877551,10,0.718695536339052
-"M2 open 2","Mojave","M2",2,"open",2.75,NA,NA,NA,4,NA,15,8,0,92,NA,NA,NA,"Y","july.4","july.7","july.7",NA,"M2 open 2",30,2.36773674755986,0.882222222222222,14,0.897190341789597
+"M2 open 2","Mojave","M2",2,"open",2.75,NA,NA,NA,4,NA,15,8,0,92,NA,NA,NA,"Y","july.4","july.7","july.7",NA,"M2 open 2",30,2.41394655959718,0.884444444444444,15,0.891396532684172
 "M2 open 22","Mojave","M2",22,"open",1.7835,NA,NA,NA,1,NA,12,15,0,85,NA,NA,NA,"Y","july.5","july.8","july.8",NA,"M2 open 22",21,2.01736362344825,0.829931972789116,10,0.876129889655925
 "M2 open 26","Mojave","M2",26,"open",0.4663,NA,NA,NA,1,NA,5,6,0,94,NA,NA,NA,"Y","july.5","july.8","july.8",NA,"M2 open 26",19,2.15608838086276,0.853185595567867,11,0.899158693593227
 "M2 open 6","Mojave","M2",6,"open",0.0637,NA,NA,NA,0,NA,9,5,0,95,NA,NA,NA,"Y","july.4","july.7","july.7",NA,"M2 open 6",9,1.67698777432242,0.790123456790123,6,0.935944697445866
@@ -91,8 +91,8 @@
 "PAN1 ephedra 22","Panoche","PAN1",22,"ephedra",2.0379,315,245,80,3,4,33,45,0,55,NA,NA,"Y","Y","june.23","june.26","june.26",NA,"PAN1 ephedra 22",10,1.22752941145721,0.6,5,0.762706906537766
 "PAN1 ephedra 26","Panoche","PAN1",26,"ephedra",3.49,290,240,125,3,3,37,35,0,65,NA,NA,NA,"Y","june.23","june.26","june.26",NA,"PAN1 ephedra 26",126,0.138673369564118,0.0468631897203327,4,0.100031691286758
 "PAN1 ephedra 30","Panoche","PAN1",30,"ephedra",6.6091,270,260,130,3,0,36,45,0,55,NA,NA,NA,"Y","june.23","june.26","june.26",NA,"PAN1 ephedra 30",3,1.09861228866811,0.666666666666667,3,1
-"PAN1 ephedra 34","Panoche","PAN1",34,"ephedra",2.341,360,280,145,3,2,30,60,0,4,NA,NA,NA,"Y","june.23","june.26","june.26","mutillid, wasp etc","PAN1 ephedra 34",35,1.2165426334087,0.48,10,0.52833775268945
-"PAN1 ephedra 38","Panoche","PAN1",38,"ephedra",5.2312,285,265,90,4,0,30,70,0,30,NA,NA,NA,"Y","june.23","june.26","june.26",NA,"PAN1 ephedra 38",27,1.28794353181236,0.631001371742112,6,0.718814971502421
+"PAN1 ephedra 34","Panoche","PAN1",34,"ephedra",2.341,360,280,145,3,2,30,60,0,4,NA,NA,NA,"Y","june.23","june.26","june.26","mutillid, wasp etc","PAN1 ephedra 34",34,1.15954006515425,0.451557093425605,10,0.503581851842227
+"PAN1 ephedra 38","Panoche","PAN1",38,"ephedra",5.2312,285,265,90,4,0,30,70,0,30,NA,NA,NA,"Y","june.23","june.26","june.26",NA,"PAN1 ephedra 38",28,1.42684473139564,0.660714285714286,7,0.73325314228323
 "PAN1 ephedra 5","Panoche","PAN1",5,"ephedra",9.142,220,170,90,1,2,36,80,0,20,NA,NA,NA,"Y","june.23.morning","june.26","june.26",NA,"PAN1 ephedra 5",12,0.286835983056161,0.152777777777778,2,0.413816850303634
 "PAN1 ephedra 9","Panoche","PAN1",9,"ephedra",2.5443,455,280,125,2,0,26,70,0,30,NA,NA,NA,"Y","june.23.morning","june.26","june.26",NA,"PAN1 ephedra 9",11,1.84622021932163,0.826446280991736,7,0.948769510358905
 "PAN1 open 1","Panoche","PAN1",1,"open",1.1074,NA,NA,NA,4,NA,17,20,4,76,NA,NA,NA,"Y","june.23.morning","june.26","june.26",NA,"PAN1 open 1",6,0.867563228481461,0.5,3,0.789690082142847
@@ -124,12 +124,12 @@
 "PAN3 ephedra 36","Panoche","PAN3",36,"ephedra",7.9182,360,330,105,4,0,16,40,0,60,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 ephedra 36",62,1.58240308423147,0.77003121748179,7,0.813194321947333
 "PAN3 ephedra 40","Panoche","PAN3",40,"ephedra",10.0419,465,370,130,NA,NA,40,90,0,10,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 ephedra 40",97,1.25500205607457,0.599426081411415,8,0.603528414201411
 "PAN3 ephedra 8","Panoche","PAN3",8,"ephedra",5.9177,310,245,110,1,4,62,80,0,20,0,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 ephedra 8",13,1.5857708352081,0.757396449704142,6,0.885035554404686
-"PAN3 open 12","Panoche","PAN3",12,"open",4.8548,NA,NA,NA,0,NA,29,90,0,10,0,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 12",10,1.55711309805765,0.78,5,0.967488764883562
+"PAN3 open 12","Panoche","PAN3",12,"open",4.8548,NA,NA,NA,0,NA,29,90,0,10,0,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 12",10,1.69574253416963,0.8,6,0.946411928215015
 "PAN3 open 16","Panoche","PAN3",16,"open",4.6701,NA,NA,NA,0,NA,26,85,3,12,0,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 16",19,1.12859629366222,0.559556786703601,5,0.701236304266835
 "PAN3 open 19","Panoche","PAN3",19,"open",0.9935,NA,NA,NA,0,NA,18,25,0,75,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 19",18,0.960891979667283,0.45679012345679,5,0.597035755305427
 "PAN3 open 23","Panoche","PAN3",23,"open",0.7017,NA,NA,NA,0,NA,22,20,0,80,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 23",16,1.03739232462091,0.5,5,0.644568092130976
 "PAN3 open 28","Panoche","PAN3",28,"open",7.7265,NA,NA,NA,1,NA,50,65,0,35,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 28",15,1.50659508813164,0.675555555555556,7,0.774236718413257
 "PAN3 open 32","Panoche","PAN3",32,"open",15.7999,NA,NA,NA,0,NA,44,95,0,5,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 32",9,1.42706104338072,0.716049382716049,5,0.886682880001534
-"PAN3 open 40","Panoche","PAN3",40,"open",4.8733,NA,NA,NA,1,NA,59,85,0,15,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 40",397,0.586601234456159,0.312418707053531,4,0.423143345964622
+"PAN3 open 40","Panoche","PAN3",40,"open",4.8733,NA,NA,NA,1,NA,59,85,0,15,NA,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 40",399,0.20126275103549,0.0909290770786616,3,0.183197250851334
 "PAN3 open 6","Panoche","PAN3",6,"open",1.8807,NA,NA,NA,7,NA,27,15,2,8,0,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 6",8,1.38629436111989,0.6875,5,0.861353116146786
 "PAN3 open 8","Panoche","PAN3",8,"open",2.8928,NA,NA,NA,0,NA,17,15,2,83,0,NA,NA,"Y","june.23.morning","june.26.morning","june.26.morning",NA,"PAN3 open 8",17,1.00621456594408,0.532871972318339,4,0.725830382178883
