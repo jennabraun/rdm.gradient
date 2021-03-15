@@ -83,10 +83,10 @@ shrub.dist <- vegdist(comm.shrub, method = "bray")
 open.dist <- as.matrix(open.dist)
 
 #indicator species analysis
-factor(eph$Microsite, levels = c("ephedra", "open"))
-eph$group <- paste(eph$Region, eph$Microsite)
 library(indicspecies)
-indval <- multipatt(comm, eph$group, control = how(nperm=999))
+factor(env$Microsite, levels = c("ephedra", "open"))
+env$group <- paste(env$Region, env$Microsite)
+indval <- multipatt(comm, env$group, control = how(nperm=999))
 summary(indval)
 
-adonis(comm ~ Microsite  + rdm.cov + RDM + arid + ESI, data = env, strata = env$site)
+adonis(comm ~ Microsite  + rdm.cov + RDM + arid + ESI, data = env)

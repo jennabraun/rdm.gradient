@@ -213,8 +213,8 @@ summary(m4)
 #nb models don't coverge -> likely suggests overdispersion not an issue but should add a formal check
 
 eph <- filter(eph, Microsite != "larrea")
-m4.p <- glmmTMB(Species ~ Microsite + RDM + rdm.cov +  arid + ESI +(1|site), family = "poisson", data = eph)
-
+m4.p <- glmmTMB(Species ~ Microsite+RDM + rdm.cov +  arid + ESI +(1|site), family = "poisson", data = eph)
+summary(m4.p)
 check_overdispersion(m4.p)
 
 #wow wow, I can actually use a poisson model 
