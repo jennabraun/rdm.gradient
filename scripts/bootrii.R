@@ -51,6 +51,7 @@ richness.effect <- eph %>% split(.$site) %>% map(boot.rii, treatment="Microsite"
 richness.effect <- do.call(rbind, richness.effect)
 richness.effect$site <- row.names(richness.effect)
 
+
 abun.effect <- eph %>% split(.$site) %>% map(boot.rii, treatment="Microsite", variable="abun", 9999)
 abun.effect <- do.call(rbind, abun.effect)
 abun.effect$site <- row.names(abun.effect)

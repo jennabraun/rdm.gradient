@@ -115,6 +115,9 @@ ggplot(filter(eph, abun < 350), aes(RDM, abun, fill = Microsite)) + geom_smooth(
 ```
 
 
+
+
+
 ## Site level RII 
 ### Residual dry matter
 
@@ -144,7 +147,7 @@ sum(arth.eph$Quantity)
 ants <- filter(arth.eph, Family == "Formicidae") 
 sum(ants$Quantity)
 ants %>% count(highest.rtu)
-ants %>% count(morph)
+
 
 
 mean(eph.abun$abun)
@@ -155,12 +158,12 @@ order <- arth.eph %>% group_by(Order) %>% summarise(sum = sum(Quantity))
 sum(order$sum)
 
 beetles <- filter(arth.eph, Order == "Coleoptera")
-beetles %>% count(morph)
+beetles %>% count(highest.rtu)
 fam <- arth.eph %>% group_by(Family) %>% summarise(sum = sum(Quantity))
 
 #how many plots contain green veg
 
-eph %>% count(green.cov == 0)
+#eph %>% count(green.cov == 0)
 
 ```
 
@@ -237,6 +240,13 @@ anova(m4.p, m6)
 check_collinearity(m4.p)
 summary(m4.p)
 knitr::kable(car::Anova(m4.p, type = 2))
+
+
+## Richness no singletons
+
+m1nos <- glmmTMB(Species.nos ~ Microsite+RDM + rdm.cov +  arid + ESI +(1|site), family = "poisson", data = eph)
+summary(m1nos)
+check_overdispersion(m1nos)
 
 ```
 ## Influence of shrub size

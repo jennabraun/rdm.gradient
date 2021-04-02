@@ -5,6 +5,7 @@ library(ggfortify)
 library(ggvegan)
 
 comm <- read.csv("clean_data/comm.csv")
+comm <- wide.nosingles
 row.names(comm) <- comm$X
 comm <- comm[,-1]
 env <- read.csv("clean_data/cov.csv")
