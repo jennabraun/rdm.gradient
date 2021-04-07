@@ -28,7 +28,7 @@ Pitfall traps were deployed along an aridity gradient in California to measure a
 env <- read.csv("clean_data/cov.csv")
 comm <- read.csv("clean_data/comm.csv")
 rdm <- read.csv("clean_data/veg_covariates.csv")
-#rdm <- filter(rdm, Microsite != "larrea")
+rdm <- filter(rdm, Microsite != "larrea")
 eph <- filter(env)
 sum(eph$abun)
 str(eph)
