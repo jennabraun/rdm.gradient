@@ -3,9 +3,8 @@
 library(vegan)
 library(ggfortify)
 library(ggvegan)
-
+library(dplyr)
 comm <- read.csv("clean_data/comm.csv")
-comm <- wide.nosingles
 row.names(comm) <- comm$X
 comm <- comm[,-1]
 env <- read.csv("clean_data/cov.csv")
@@ -87,7 +86,26 @@ open.dist <- as.matrix(open.dist)
 library(indicspecies)
 factor(env$Microsite, levels = c("ephedra", "open"))
 env$group <- paste(env$Region, env$Microsite)
-indval <- multipatt(comm, env$group, control = how(nperm=999))
+indval <- multipatt(comm2, env$group, control = how(nperm=999))
 summary(indval)
 
 adonis(comm ~ Microsite  + rdm.cov + RDM + arid + ESI, data = env)
+
+#no singles
+
+comm2 <- read.csv("clean_data/comm_nos.csv")
+comm2 <- comm2[,-1]
+r1 <- cca(comm2 ~ Microsite  + rdm.cov + RDM +  site,  data = env)
+summary(r1)
+r1
+alias(r1, names = TRUE)
+goodness(r1)
+a1 <- anova(r1, by = "margin")
+a1
+a2 <- anova(r1, by = "terms")
+a2
+
+a3 <- anosim(comm2, env$Microsite, permutations = 999, distance = "bray")
+summary(a3)
+a4 <- anosim(comm2, env$Region, permutations = 999, distance = "bray")
+summary(a4)

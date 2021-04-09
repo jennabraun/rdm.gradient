@@ -246,6 +246,7 @@ knitr::kable(car::Anova(m4.p, type = 2))
 
 m1nos <- glmmTMB(Species.nos ~ Microsite+RDM + rdm.cov +  arid + ESI +(1|site), family = "poisson", data = eph)
 summary(m1nos)
+knitr::kable(car::Anova(m1nos, type = 2))
 check_overdispersion(m1nos)
 
 ```
