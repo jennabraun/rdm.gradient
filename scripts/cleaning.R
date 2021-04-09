@@ -41,6 +41,7 @@ sum(arth.ag$Quantity)
 
 arth.ag$highest.rtu <- gsub(" ","", arth.ag$highest.rtu)
 
+chk <- arth.ag %>% ungroup() %>% select(highest.rtu) %>% count(highest.rtu)
 
 wide <- arth.ag %>% spread(highest.rtu, Quantity)
 wide[is.na(wide)] <- 0

@@ -453,6 +453,7 @@ for (i in 1:length(grobs)){
 }
 
 p <- do.call("grid.arrange", c(grobs, ncol = 1))
+p
 
 #grid.arrange(p, l1, ncol = 1,  heights = c(1, 0.1))
 ```
