@@ -121,9 +121,10 @@ write.csv(metadata, "clean_data/cov.csv")
 write.csv(wide, "clean_data/comm.csv")
 write.csv(wide.nosingles, "clean_data/comm_nos.csv")
 
+#export .csv for publication on KNB
 
-
-
+arth <- select(arth, 4:15)
+write.csv(arth, "clean_data/species_data.csv")
 # arth <- select(arth, morph, Region, pres)
 # arth <- distinct(arth)
 # regions <- arth %>% pivot_wider(., morph, names_from = Region, values_from = pres)
