@@ -1,10 +1,10 @@
 site,label
-C1,1
-C2,2
-C3,3
-PAN3,4
-PAN2,5
-PAN1,6
-M2,7
-M1,8
-M3,9
+C1,Semi-arid 1
+C2,Semi-arid 2
+C3,Semi-arid 3
+PAN3,Semi-arid 4
+PAN2,Semi-arid 5
+PAN1,Semi-arid 6
+M2,Arid 7
+M1,Arid 8
+M3,Arid 9
