@@ -86,7 +86,7 @@ open.dist <- as.matrix(open.dist)
 library(indicspecies)
 factor(env$Microsite, levels = c("ephedra", "open"))
 env$group <- paste(env$Region, env$Microsite)
-indval <- multipatt(comm2, env$group, control = how(nperm=999))
+indval <- multipatt(comm, env$group, control = how(nperm=999))
 summary(indval)
 
 adonis(comm ~ Microsite  + rdm.cov + RDM + arid + ESI, data = env)
