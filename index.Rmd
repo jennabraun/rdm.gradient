@@ -485,7 +485,7 @@ names( group.colors ) <- LETTERS[1:4]; group.colors
 
 
 rii.plot <- ggplot(test, aes(x=response, y=average)) + geom_point(aes(response, average,  color = label), position = position_dodge(width = 0.7),  size=4)+ geom_errorbar(aes(ymin=average-error, ymax=average + error, color = label), width=.1, position= position_dodge(width = 0.7))  + ylim(-1, 1) + theme(axis.text.x=element_text(angle=90, vjust=.5)) + ylab("RII") + xlab("") + geom_hline(aes(yintercept=0))  + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black")) + scale_x_discrete(labels = c("RDM Biomass (g)", "RDM Cover (%)", "Arthropod Richness", "Arthropod Abundance \n (captures/trap)")) +  scale_colour_manual( values= group.colors, name = "Sites")
+panel.background = element_blank(), axis.line = element_line(colour = "black")) + scale_x_discrete(labels = c("RDM Biomass (g)", "RDM Cover (%)", "Arthropod Richness", "Arthropod Abundance \n (captures/trap)")) +  scale_colour_manual( values= group.colors, name = "Sites")+ theme(text = element_text(size = 25))
 
 rii.plot 
 
@@ -511,7 +511,7 @@ a <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 0, y = 0.23),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5)))+ ylab("Mean RII Arthropod Richness") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(text = element_text(size = 18))
 
 
 fit1 <- lm(richness ~ cov, rel.rii)
@@ -521,7 +521,7 @@ b <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 0.25, y = 0.23),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5)))  + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(text = element_text(size = 18))
 b
 
 
@@ -532,7 +532,7 @@ c <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = -0, y = 0.65),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + xlab("Mean RII RDM Biomass") + ylab("Mean RII Arthropod Abundance") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black")) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black")) + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(text = element_text(size = 18))
 c
 
 fit1 <- lm(abun ~ cov, rel.rii)
@@ -542,7 +542,7 @@ d <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 0.24, y = 0.65),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + xlab("Mean RII RDM cover") + ylab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(text = element_text(size = 18))
 
 d
 
@@ -561,7 +561,7 @@ a <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 4, y = 3.5),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("Mean RDM Biomass (g)") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(text = element_text(size = 18))
 a
 
 
@@ -572,7 +572,7 @@ b <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mod
   geom_label(aes(x = 0.03, y = 3.5),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 b
 
 
@@ -583,7 +583,7 @@ c <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 4, y = 60),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("Mean RDM Cover (%)") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 c
 
 
@@ -594,7 +594,7 @@ d <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mod
   geom_label(aes(x = 0.03, y = 60),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 d
 
 
@@ -605,7 +605,7 @@ e <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 4, y = 1),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + ylab("Mean RII RDM Biomass")
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + ylab("Mean RII RDM Biomass")+ theme(text = element_text(size = 18))
 e
 
 
@@ -616,7 +616,7 @@ f <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mod
   geom_label(aes(x = 0.03, y = 0.78),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) 
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + theme(text = element_text(size = 18))
 f
 
 fit1 <- filter(site.rii, response == "cov") %>% lm(average ~ arid,.)
@@ -626,7 +626,7 @@ g <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 4, y = 0.75),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("Mean RII Cover") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 g
 
 fit1 <- filter(site.rii, response == "cov") %>% lm(average ~ ESI,.)
@@ -636,7 +636,7 @@ h <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mod
   geom_label(aes(x = 0.04, y = 0.7),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 h
 
 
@@ -647,7 +647,7 @@ i <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 4, y = 0.24),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("Mean RII Richness") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 
 i
 
@@ -658,7 +658,7 @@ j <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mod
   geom_label(aes(x = 0.03, y = 0.3),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 j
 
 fit1 <- filter(site.rii, response == "abun") %>% lm(average ~ arid,.)
@@ -668,7 +668,7 @@ k <- ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mode
   geom_label(aes(x = 4, y = 0.8),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + xlab("Aridity") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + ylab("Mean RII Abundance")
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm")) + ylab("Mean RII Abundance")+ theme(text = element_text(size = 18))
 k
 
 
@@ -679,7 +679,7 @@ l <-  ggplot(fit1$model, aes_string(x = names(fit1$model)[2], y = names(fit1$mod
   geom_label(aes(x = 0.04, y = 0.8),vjust=1, hjust = 0, 
              label = paste("Adj r2 = ",signif(summary(fit1)$adj.r.squared, 5),
  " \nP =",signif(summary(fit1)$coef[2,4], 5))) + ylab("") + xlab("Evaporative Stress Index") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))
+panel.background = element_blank(), axis.line = element_line(colour = "black"))  + theme(plot.margin=grid::unit(c(0,0,0,0), "mm"))+ theme(text = element_text(size = 18))
 l
 
 

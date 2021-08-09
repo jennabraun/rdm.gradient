@@ -12,7 +12,7 @@ points <- SpatialPoints(coords, proj4string = CRS("+proj=longlat +ellps=WGS84 +d
 r <- getData("worldclim",var="bio",res=0.5, lon = -120.8120, lat = 36.70654)
 r <- r[[c(1,12, 5)]]
 names(r) <- c("Temp","Prec", "Max")
-values <- extract(r,points)
+raster::values <- extract(r,points)
 pan <- cbind.data.frame(coordinates(points),values)
 pan
 
@@ -23,10 +23,12 @@ values <- extract(r,points)
 moj <- cbind.data.frame(coordinates(points),values)
 moj
 
+
 #put together
 pan <- filter(pan, Temp != "NA")
 moj <- filter(moj, Temp != "NA")
 sites <- rbind(pan, moj)
+sites <- read.csv("clean_data/sites_worldclim.csv")
 sites$site <- site
 sites <- mutate(sites, Temp = Temp/10)
 sites <- mutate(sites, Max = Max/10)
