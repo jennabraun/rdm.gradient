@@ -22,6 +22,8 @@ library(gridExtra)
 
 Pitfall traps were deployed along an aridity gradient in California to measure associations of ground-dwelling arthropods with foundation shrubs, and to assess the ability of residual dry matter (RDM) as an indicator of arthropod community structure.
 
+URL of repository with cleaning scripts and data: https://github.com/jennabraun/rdm.gradient
+
 ***
 
 ```{r}
