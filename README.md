@@ -14,11 +14,15 @@ See https://jennabraun.github.io/rdm.gradient for final work up
 
 * Raw Data folder holds excel workbooks used for data entry
 * Clean Data folder holds .csv files for analysis along with metadata describing the variables
+* Figures are the final figures
+* gpx holds the .gpx for sampling locations
+* scripts hold R scripts for processing the datasets
+
 
 ### Script descriptions
 * cleaning.R takes the raw data workbooks as inputs and writes to clean data folder
-* functions.R is a set of useful functions (calculating standard error, formating graphs)
-* eda.R takes clean data as input and generates graphs & modelling
-
+* RII.R calculates RII and outputs results as .csv which are read into index.rmd
+* ordination.R is the CCA and indicator species code
+* worldclim.R downloads worldclim data for coordinates
 
 
